@@ -72,7 +72,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       throw redirect({ to: "/" });
     }
 
-    return session;
+    return { user: session?.user!, session: session?.session! };
   },
   notFoundComponent: NotFound,
 });
