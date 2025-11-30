@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiSplatRouteImport } from './routes/api.$'
+import { Route as authLoginRouteImport } from './routes/(auth)/login'
 import { Route as ApiRpcSplatRouteImport } from './routes/api.rpc.$'
+import { Route as ApiAuthSplatRouteImport } from './routes/api.auth.$'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -23,39 +25,63 @@ const ApiSplatRoute = ApiSplatRouteImport.update({
   path: '/api/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const authLoginRoute = authLoginRouteImport.update({
+  id: '/(auth)/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
   id: '/api/rpc/$',
   path: '/api/rpc/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof authLoginRoute
   '/api/$': typeof ApiSplatRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof authLoginRoute
   '/api/$': typeof ApiSplatRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/(auth)/login': typeof authLoginRoute
   '/api/$': typeof ApiSplatRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/$' | '/api/rpc/$'
+  fullPaths: '/' | '/login' | '/api/$' | '/api/auth/$' | '/api/rpc/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/$' | '/api/rpc/$'
-  id: '__root__' | '/' | '/api/$' | '/api/rpc/$'
+  to: '/' | '/login' | '/api/$' | '/api/auth/$' | '/api/rpc/$'
+  id:
+    | '__root__'
+    | '/'
+    | '/(auth)/login'
+    | '/api/$'
+    | '/api/auth/$'
+    | '/api/rpc/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  authLoginRoute: typeof authLoginRoute
   ApiSplatRoute: typeof ApiSplatRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
 }
 
@@ -75,6 +101,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/(auth)/login': {
+      id: '/(auth)/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof authLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/rpc/$': {
       id: '/api/rpc/$'
       path: '/api/rpc/$'
@@ -82,12 +115,21 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiRpcSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  authLoginRoute: authLoginRoute,
   ApiSplatRoute: ApiSplatRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,
 }
 export const routeTree = rootRouteImport
