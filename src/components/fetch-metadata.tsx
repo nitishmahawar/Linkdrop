@@ -22,11 +22,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 import { toast } from "sonner";
 
 const formSchema = z.object({
-  url: z.string().url({ message: "Please enter a valid URL" }),
+  url: z.url({ error: "Please enter a valid URL" }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -90,9 +90,7 @@ export const FetchMetadata = () => {
                 disabled={mutation.isPending}
                 className="w-full"
               >
-                {mutation.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
+                {mutation.isPending && <Spinner className="mr-2" />}
                 {mutation.isPending ? "Fetching..." : "Fetch Metadata"}
               </Button>
             </form>

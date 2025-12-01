@@ -2,13 +2,13 @@ import { z } from "zod";
 
 // Create Tag Schema
 export const createTagSchema = z.object({
-  name: z.string().min(1, { message: "Tag name is required" }),
+  name: z.string().min(1, { error: "Tag name is required" }),
 });
 
 // Update Tag Schema
 export const updateTagSchema = z.object({
   id: z.string(),
-  name: z.string().min(1, { message: "Tag name is required" }),
+  name: z.string().min(1, { error: "Tag name is required" }),
 });
 
 // Get Tag by ID Schema

@@ -11,10 +11,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import type { Link } from "@/orpc/router/links";
 
 interface DeleteLinkDialogProps {
-  link: any; // TODO: Type this properly from ORPC
+  link: Link;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -62,9 +63,7 @@ export const DeleteLinkDialog = ({
             disabled={deleteMutation.isPending}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {deleteMutation.isPending && (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            )}
+            {deleteMutation.isPending && <Spinner className="mr-2" />}
             Delete
           </AlertDialogAction>
         </AlertDialogFooter>

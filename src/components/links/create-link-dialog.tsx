@@ -26,15 +26,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Loader2, Link as LinkIcon, Sparkles } from "lucide-react";
+import { Link as LinkIcon, Sparkles } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 const formSchema = z.object({
-  url: z.string().url({ message: "Please enter a valid URL" }),
-  title: z.string().min(1, { message: "Title is required" }),
+  url: z.url({ error: "Please enter a valid URL" }),
+  title: z.string().min(1, { error: "Title is required" }),
   description: z.string().optional(),
   notes: z.string().optional(),
-  faviconUrl: z.string().url().optional().or(z.literal("")),
-  previewImageUrl: z.string().url().optional().or(z.literal("")),
+  faviconUrl: z.url().optional().or(z.literal("")),
+  previewImageUrl: z.url().optional().or(z.literal("")),
   isFavorite: z.boolean().optional(),
   categoryIds: z.array(z.string()).optional(),
   tagIds: z.array(z.string()).optional(),
@@ -110,6 +111,7 @@ export const CreateLinkDialog = ({ trigger }: CreateLinkDialogProps) => {
         form.reset();
       },
       onError: (error) => {
+        console.log(error);
         toast.error(error.message);
       },
     })
@@ -125,7 +127,13 @@ export const CreateLinkDialog = ({ trigger }: CreateLinkDialogProps) => {
   };
 
   const onSubmit = (values: FormValues) => {
-    createMutation.mutate(values);
+    // Transform empty strings to undefined for optional URL fields
+    const payload = {
+      ...values,
+      faviconUrl: values.faviconUrl || undefined,
+      previewImageUrl: values.previewImageUrl || undefined,
+    };
+    createMutation.mutate(payload);
   };
 
   return (
@@ -166,13 +174,16 @@ export const CreateLinkDialog = ({ trigger }: CreateLinkDialogProps) => {
                     <Button
                       type="button"
                       variant="outline"
+                      size="icon"
                       onClick={handleFetchMetadata}
                       disabled={
-                        metadataQuery.isFetching || createMutation.isPending
+                        !field.value ||
+                        metadataQuery.isFetching ||
+                        createMutation.isPending
                       }
                     >
                       {metadataQuery.isFetching ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Spinner />
                       ) : (
                         <Sparkles className="h-4 w-4" />
                       )}
@@ -255,9 +266,7 @@ export const CreateLinkDialog = ({ trigger }: CreateLinkDialogProps) => {
                 Cancel
               </Button>
               <Button type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
+                {createMutation.isPending && <Spinner />}
                 Create Link
               </Button>
             </DialogFooter>

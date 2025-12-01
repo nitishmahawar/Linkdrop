@@ -25,15 +25,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Loader2, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
+import type { Link } from "@/orpc/router/links";
 
 const formSchema = z.object({
-  url: z.string().url({ message: "Please enter a valid URL" }),
-  title: z.string().min(1, { message: "Title is required" }),
+  url: z.url({ error: "Please enter a valid URL" }),
+  title: z.string().min(1, { error: "Title is required" }),
   description: z.string().optional(),
   notes: z.string().optional(),
-  faviconUrl: z.string().url().optional().or(z.literal("")),
-  previewImageUrl: z.string().url().optional().or(z.literal("")),
+  faviconUrl: z.url().optional().or(z.literal("")),
+  previewImageUrl: z.url().optional().or(z.literal("")),
   isFavorite: z.boolean().optional(),
   categoryIds: z.array(z.string()).optional(),
   tagIds: z.array(z.string()).optional(),
@@ -42,7 +44,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 interface EditLinkDialogProps {
-  link: any; // TODO: Type this properly from ORPC
+  link: Link;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
@@ -143,10 +145,14 @@ export const EditLinkDialog = ({
   };
 
   const onSubmit = (values: FormValues) => {
-    updateMutation.mutate({
+    // Transform empty strings to undefined for optional URL fields
+    const payload = {
       id: link.id,
       ...values,
-    });
+      faviconUrl: values.faviconUrl || undefined,
+      previewImageUrl: values.previewImageUrl || undefined,
+    };
+    updateMutation.mutate(payload);
   };
 
   return (
@@ -177,13 +183,16 @@ export const EditLinkDialog = ({
                     <Button
                       type="button"
                       variant="outline"
+                      size="icon"
                       onClick={handleFetchMetadata}
                       disabled={
-                        metadataQuery.isFetching || updateMutation.isPending
+                        !field.value ||
+                        metadataQuery.isFetching ||
+                        updateMutation.isPending
                       }
                     >
                       {metadataQuery.isFetching ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Spinner />
                       ) : (
                         <Sparkles className="h-4 w-4" />
                       )}
@@ -266,9 +275,7 @@ export const EditLinkDialog = ({
                 Cancel
               </Button>
               <Button type="submit" disabled={updateMutation.isPending}>
-                {updateMutation.isPending && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
+                {updateMutation.isPending && <Spinner className="mr-2" />}
                 Update Link
               </Button>
             </DialogFooter>

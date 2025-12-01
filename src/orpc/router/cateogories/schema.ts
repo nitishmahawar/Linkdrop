@@ -2,14 +2,14 @@ import { z } from "zod";
 
 // Create Category Schema
 export const createCategorySchema = z.object({
-  name: z.string().min(1, { message: "Category name is required" }),
+  name: z.string().min(1, { error: "Category name is required" }),
   color: z.string().optional(),
 });
 
 // Update Category Schema
 export const updateCategorySchema = z.object({
   id: z.string(),
-  name: z.string().min(1, { message: "Category name is required" }).optional(),
+  name: z.string().min(1, { error: "Category name is required" }).optional(),
   color: z.string().optional().nullable(),
 });
 

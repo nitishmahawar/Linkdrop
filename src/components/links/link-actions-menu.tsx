@@ -20,9 +20,10 @@ import {
 } from "lucide-react";
 import { EditLinkDialog } from "./edit-link-dialog";
 import { DeleteLinkDialog } from "./delete-link-dialog";
+import type { Link } from "@/orpc/router/links";
 
 interface LinkActionsMenuProps {
-  link: any; // TODO: Type this properly from ORPC
+  link: Link;
 }
 
 export const LinkActionsMenu = ({ link }: LinkActionsMenuProps) => {
@@ -61,11 +62,11 @@ export const LinkActionsMenu = ({ link }: LinkActionsMenuProps) => {
           onClick={handleToggleFavorite}
           disabled={toggleFavoriteMutation.isPending}
         >
-          {link.isFavorite ? (
-            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-          ) : (
-            <StarOff className="h-4 w-4" />
-          )}
+          <Star
+            className={
+              link.isFavorite ? "fill-yellow-400 text-yellow-400" : "h-4 w-4"
+            }
+          />
         </Button>
 
         <DropdownMenu>
@@ -82,12 +83,12 @@ export const LinkActionsMenu = ({ link }: LinkActionsMenuProps) => {
                 rel="noopener noreferrer"
                 className="flex items-center cursor-pointer"
               >
-                <ExternalLink className="mr-2 h-4 w-4" />
+                <ExternalLink />
                 Open Link
               </a>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setEditOpen(true)}>
-              <Edit className="mr-2 h-4 w-4" />
+              <Edit />
               Edit
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -95,7 +96,7 @@ export const LinkActionsMenu = ({ link }: LinkActionsMenuProps) => {
               className="text-destructive"
               onClick={() => setDeleteOpen(true)}
             >
-              <Trash2 className="mr-2 h-4 w-4" />
+              <Trash2 />
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>

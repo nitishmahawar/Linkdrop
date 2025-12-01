@@ -1,6 +1,6 @@
 import { protectedProcedure } from "@/orpc";
 import { prisma } from "@/lib/prisma";
-import { ORPCError } from "@orpc/server";
+import { InferRouterOutputs, ORPCError } from "@orpc/server";
 import {
   createLinkSchema,
   updateLinkSchema,
@@ -329,3 +329,7 @@ export const linksRouter = {
       return { success: true, deletedCount: result.count };
     }),
 };
+
+export type Link = InferRouterOutputs<
+  typeof linksRouter
+>["list"]["links"][number];

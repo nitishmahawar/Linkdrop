@@ -2,12 +2,12 @@ import { z } from "zod";
 
 // Create Link Schema
 export const createLinkSchema = z.object({
-  url: z.string().url({ message: "Invalid URL format" }),
-  title: z.string().min(1, { message: "Title is required" }),
+  url: z.url({ error: "Invalid URL format" }),
+  title: z.string().min(1, { error: "Title is required" }),
   description: z.string().optional(),
   notes: z.string().optional(),
-  faviconUrl: z.string().url().optional(),
-  previewImageUrl: z.string().url().optional(),
+  faviconUrl: z.url().optional(),
+  previewImageUrl: z.url().optional(),
   isFavorite: z.boolean().default(false),
   categoryIds: z.array(z.string()).optional(),
   tagIds: z.array(z.string()).optional(),
@@ -16,12 +16,12 @@ export const createLinkSchema = z.object({
 // Update Link Schema
 export const updateLinkSchema = z.object({
   id: z.string(),
-  url: z.string().url({ message: "Invalid URL format" }).optional(),
-  title: z.string().min(1, { message: "Title is required" }).optional(),
+  url: z.url({ error: "Invalid URL format" }).optional(),
+  title: z.string().min(1, { error: "Title is required" }).optional(),
   description: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
-  faviconUrl: z.string().url().optional().nullable(),
-  previewImageUrl: z.string().url().optional().nullable(),
+  faviconUrl: z.url().optional().nullable(),
+  previewImageUrl: z.url().optional().nullable(),
   isFavorite: z.boolean().optional(),
   categoryIds: z.array(z.string()).optional(),
   tagIds: z.array(z.string()).optional(),
@@ -59,7 +59,7 @@ export const toggleFavoriteSchema = z.object({
 export const bulkDeleteLinksSchema = z.object({
   ids: z
     .array(z.string())
-    .min(1, { message: "At least one link ID is required" }),
+    .min(1, { error: "At least one link ID is required" }),
 });
 
 // Export types

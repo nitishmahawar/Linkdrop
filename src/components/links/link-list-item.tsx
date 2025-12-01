@@ -8,9 +8,10 @@ import {
 } from "@/components/ui/item";
 import { Badge } from "@/components/ui/badge";
 import { LinkActionsMenu } from "./link-actions-menu";
+import type { Link } from "@/orpc/router/links";
 
 interface LinkListItemProps {
-  link: any; // TODO: Type this properly from ORPC
+  link: Link;
 }
 
 export const LinkListItem = ({ link }: LinkListItemProps) => {
