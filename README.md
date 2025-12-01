@@ -347,4 +347,4 @@ For support, email support@linkdrop.com or open an issue on GitHub.
 
 ---
 
-Made with ❤️ by [Your Name]
+Made with ❤️ by Nitish Mahawar

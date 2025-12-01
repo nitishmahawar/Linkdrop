@@ -1,7 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { orpc } from "@/orpc/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LinkCard } from "./link-card";
@@ -31,16 +35,17 @@ export const LinksList = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
+      <div className="flex items-center justify-between gap-4">
+        <InputGroup className="flex-1 max-w-xs">
+          <InputGroupAddon>
+            <Search />
+          </InputGroupAddon>
+          <InputGroupInput
             placeholder="Search links..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
           />
-        </div>
+        </InputGroup>
 
         <Tabs
           value={viewMode}
@@ -95,10 +100,10 @@ export const LinksList = () => {
 
               {/* Pagination Info */}
               <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <p>
+                {/* <p>
                   Showing {linksQuery.data.links.length} of{" "}
                   {linksQuery.data.total} links
-                </p>
+                </p> */}
                 {linksQuery.data.hasMore && (
                   <Button variant="outline" size="sm">
                     Load More

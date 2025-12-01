@@ -22,7 +22,7 @@ export const LinkCard = ({ link }: LinkCardProps) => {
 
   return (
     <Card
-      className="group relative overflow-hidden cursor-pointer pt-0"
+      className="group relative hover:ring-2 hover:ring-primary/20 overflow-hidden cursor-pointer pt-0"
       onClick={handleCardClick}
     >
       {/* Preview Image or Gradient Placeholder */}

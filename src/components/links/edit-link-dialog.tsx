@@ -95,7 +95,7 @@ export const EditLinkDialog = ({
     enabled: !!urlToFetch,
   });
 
-  // Handle metadata query success/error with useEffect
+  // Handle metadata query success/error with useEffect (silent, no toasts)
   useEffect(() => {
     if (metadataQuery.isSuccess && urlToFetch) {
       const metadata = metadataQuery.data;
@@ -106,12 +106,11 @@ export const EditLinkDialog = ({
       if (metadata.previewImageUrl)
         form.setValue("previewImageUrl", metadata.previewImageUrl);
 
-      toast.success("Metadata fetched successfully!");
       setUrlToFetch(null);
     }
 
     if (metadataQuery.isError && urlToFetch) {
-      toast.error("Failed to fetch metadata");
+      // Silently fail - no toast notification
       setUrlToFetch(null);
     }
   }, [
@@ -138,10 +137,20 @@ export const EditLinkDialog = ({
   const handleFetchMetadata = () => {
     const url = form.getValues("url");
     if (!url) {
-      toast.error("Please enter a URL first");
       return;
     }
     setUrlToFetch(url);
+  };
+
+  // Auto-fetch metadata on URL paste
+  const handleUrlPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pastedUrl = e.clipboardData.getData("text");
+    if (pastedUrl && pastedUrl.startsWith("http")) {
+      // Wait for the input value to update, then fetch metadata
+      setTimeout(() => {
+        setUrlToFetch(pastedUrl);
+      }, 100);
+    }
   };
 
   const onSubmit = (values: FormValues) => {
@@ -177,6 +186,7 @@ export const EditLinkDialog = ({
                       <Input
                         placeholder="https://example.com"
                         {...field}
+                        onPaste={handleUrlPaste}
                         disabled={updateMutation.isPending}
                       />
                     </FormControl>
@@ -199,7 +209,8 @@ export const EditLinkDialog = ({
                     </Button>
                   </div>
                   <FormDescription>
-                    Click the sparkle icon to auto-fetch metadata
+                    Paste a URL to auto-fetch metadata, or click the sparkle
+                    icon
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

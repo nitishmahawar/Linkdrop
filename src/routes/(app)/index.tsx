@@ -7,7 +7,7 @@ export const Route = createFileRoute("/(app)/")({
 
 function RouteComponent() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl md:text-2xl font-bold">My Links</h1>
