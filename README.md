@@ -1,308 +1,350 @@
-Welcome to your new TanStack app! 
+# 🔗 Linkdrop
 
-# Getting Started
+A modern, feature-rich bookmark manager built with React, TanStack Start, and Prisma. Save, organize, and manage your links with automatic metadata fetching, categories, tags, and a beautiful UI.
 
-To run this application:
+![Linkdrop](https://img.shields.io/badge/version-1.0.0-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
+
+## ✨ Features
+
+### 📚 Link Management
+
+- **Save Links**: Add URLs with automatic metadata fetching (title, description, favicon, preview images)
+- **Rich Metadata**: Automatically scrapes and displays link information using Cheerio
+- **Edit & Delete**: Full CRUD operations for managing your saved links
+- **Favorites**: Star/favorite important links for quick access
+- **Notes**: Add personal notes to any link
+
+### 🗂️ Organization
+
+- **Categories**: Create custom categories with optional colors
+- **Tags**: Add multiple tags to links for flexible organization
+- **Search**: Powerful search across titles, descriptions, notes, and URLs
+- **Filters**: Filter by category, tags, or favorites
+- **Sorting**: Sort by creation date, update date, or title
+
+### 🎨 User Interface
+
+- **Dual View Modes**: Switch between grid and list views
+- **Responsive Design**: Fully responsive layout (1-4 columns on different screen sizes)
+- **Dark/Light Mode**: Theme support with next-themes
+- **Beautiful Cards**: Enhanced link cards with gradient placeholders and hover effects
+- **Skeleton Loading**: Smooth loading states with skeleton screens
+- **Toast Notifications**: User-friendly feedback with Sonner
+
+### 🔐 Authentication
+
+- **Google OAuth**: Sign in with Google using Better Auth
+- **Session Management**: Secure session handling with JWT
+- **Protected Routes**: Automatic authentication checks
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+- **Framework**: [React 19](https://react.dev/) with [TanStack Start](https://tanstack.com/start)
+- **Routing**: [TanStack Router](https://tanstack.com/router)
+- **State Management**: [TanStack Query](https://tanstack.com/query) (React Query)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/) with custom animations
+- **UI Components**: [Radix UI](https://www.radix-ui.com/) primitives
+- **Forms**: [React Hook Form](https://react-hook-form.com/) with [Zod v4](https://zod.dev/) validation
+- **Icons**: [Lucide React](https://lucide.dev/)
+
+### Backend
+
+- **API Layer**: [ORPC](https://orpc.io/) - Type-safe RPC framework
+- **Database**: [PostgreSQL](https://www.postgresql.org/) with [Prisma ORM](https://www.prisma.io/)
+- **Authentication**: [Better Auth](https://better-auth.com/)
+- **Web Scraping**: [Cheerio](https://cheerio.js.org/) for metadata extraction
+
+### Development
+
+- **Build Tool**: [Vite 7](https://vitejs.dev/)
+- **Language**: [TypeScript 5.7](https://www.typescriptlang.org/)
+- **Package Manager**: [pnpm](https://pnpm.io/)
+- **Testing**: [Vitest](https://vitest.dev/) with Testing Library
+- **Linting**: TypeScript ESLint
+
+## 📋 Prerequisites
+
+- **Node.js**: v18 or higher
+- **pnpm**: v8 or higher
+- **PostgreSQL**: v14 or higher
+- **Google OAuth Credentials**: For authentication
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/linkdrop.git
+cd linkdrop
+```
+
+### 2. Install Dependencies
 
 ```bash
 pnpm install
-pnpm start
 ```
 
-# Building For Production
+### 3. Environment Setup
 
-To build this application for production:
+Create a `.env` file in the root directory:
+
+```env
+# Database
+DATABASE_URL="postgresql://user:password@localhost:5432/linkdrop"
+
+# Server (optional, for production)
+SERVER_URL="http://localhost:3000"
+
+# Google OAuth
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+
+# Better Auth
+BETTER_AUTH_SECRET="your-secret-key-here"
+BETTER_AUTH_URL="http://localhost:3000"
+```
+
+### 4. Database Setup
+
+```bash
+# Generate Prisma Client
+pnpm prisma generate
+
+# Run migrations
+pnpm prisma migrate dev
+
+# (Optional) Seed the database
+pnpm prisma db seed
+```
+
+### 5. Run Development Server
+
+```bash
+pnpm dev
+```
+
+The application will be available at `http://localhost:3000`
+
+## 📦 Available Scripts
+
+```bash
+# Development
+pnpm dev              # Start development server on port 3000
+
+# Build
+pnpm build            # Build for production
+
+# Preview
+pnpm serve            # Preview production build
+
+# Testing
+pnpm test             # Run tests with Vitest
+
+# Database
+pnpm prisma generate  # Generate Prisma Client
+pnpm prisma migrate   # Run database migrations
+pnpm prisma studio    # Open Prisma Studio
+```
+
+## 🗄️ Database Schema
+
+### Core Models
+
+#### User
+
+- Authentication and user profile
+- Relations: sessions, accounts, links, categories, tags
+
+#### Link
+
+- URL, title, description, notes
+- Favicon and preview image URLs
+- Favorite flag
+- Relations: user, categories (many-to-many), tags (many-to-many)
+
+#### Category
+
+- Name and optional color
+- Relations: user, links (many-to-many)
+
+#### Tag
+
+- Name
+- Relations: user, links (many-to-many)
+
+### Authentication Models
+
+- **Session**: User sessions with expiry
+- **Account**: OAuth provider accounts
+- **Verification**: Email verification tokens
+
+## 🏗️ Project Structure
+
+```
+linkdrop/
+├── prisma/
+│   └── schema.prisma          # Database schema
+├── public/                    # Static assets
+├── src/
+│   ├── components/           # React components
+│   │   ├── ui/              # Reusable UI components (shadcn)
+│   │   └── links/           # Link-specific components
+│   ├── generated/           # Generated Prisma client
+│   ├── lib/                 # Utility functions
+│   │   ├── auth.ts         # Authentication utilities
+│   │   ├── auth-client.ts  # Client-side auth
+│   │   └── prisma.ts       # Prisma client instance
+│   ├── orpc/               # ORPC API layer
+│   │   ├── client.ts       # ORPC client
+│   │   ├── index.ts        # ORPC server setup
+│   │   └── router/         # API routes
+│   │       ├── links/      # Links endpoints
+│   │       ├── categories/ # Categories endpoints
+│   │       ├── tags/       # Tags endpoints
+│   │       └── metadata/   # Metadata fetching
+│   ├── routes/             # TanStack Router routes
+│   │   ├── __root.tsx      # Root layout
+│   │   ├── index.tsx       # Home page
+│   │   ├── login.tsx       # Login page
+│   │   └── api.*.ts        # API handlers
+│   ├── env.ts              # Environment validation
+│   └── main.tsx            # Application entry point
+├── .env                     # Environment variables
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
+└── README.md
+```
+
+## 🔑 Key Features Explained
+
+### Automatic Metadata Fetching
+
+When you add a link, Linkdrop automatically:
+
+1. Fetches the page HTML
+2. Extracts title, description, and Open Graph metadata
+3. Downloads favicon and preview images
+4. Stores everything in the database
+
+### Type-Safe API with ORPC
+
+ORPC provides end-to-end type safety:
+
+- Shared types between client and server
+- Automatic validation with Zod v4
+- Built-in error handling
+- Seamless integration with TanStack Query
+
+### Responsive Grid Layout
+
+The link grid automatically adjusts:
+
+- **Mobile**: 1 column
+- **Tablet**: 2 columns
+- **Desktop**: 3 columns
+- **Large Desktop**: 4 columns
+
+### Enhanced Link Cards
+
+Each link card features:
+
+- Preview image or gradient placeholder with first letter
+- Favicon with fallback icon
+- Clickable card area (opens link in new tab)
+- Hover animations and effects
+- Category and tag badges
+- Action menu (edit, delete, favorite)
+
+## 🎨 Customization
+
+### Adding New UI Components
+
+This project uses shadcn/ui. To add new components:
+
+```bash
+npx shadcn@latest add [component-name]
+```
+
+### Modifying Themes
+
+Edit `src/app.css` to customize:
+
+- Color schemes
+- Typography
+- Spacing
+- Animations
+
+### Database Schema Changes
+
+1. Modify `prisma/schema.prisma`
+2. Create migration: `pnpm prisma migrate dev --name your-migration-name`
+3. Generate client: `pnpm prisma generate`
+
+## 🔒 Security
+
+- **Authentication**: OAuth 2.0 with Google
+- **Session Management**: Secure HTTP-only cookies
+- **Input Validation**: Zod v4 schemas on all endpoints
+- **SQL Injection Protection**: Prisma ORM parameterized queries
+- **XSS Protection**: React's built-in escaping
+- **CSRF Protection**: Better Auth built-in protection
+
+## 🚀 Deployment
+
+### Environment Variables
+
+Ensure all production environment variables are set:
+
+- `DATABASE_URL`: Production database connection
+- `SERVER_URL`: Production server URL
+- `GOOGLE_CLIENT_ID` & `GOOGLE_CLIENT_SECRET`: OAuth credentials
+- `BETTER_AUTH_SECRET`: Strong random secret
+- `BETTER_AUTH_URL`: Production URL
+
+### Build for Production
 
 ```bash
 pnpm build
 ```
 
-## Testing
+### Deploy to Vercel/Netlify
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+1. Connect your repository
+2. Set environment variables
+3. Deploy!
 
-```bash
-pnpm test
-```
+The project is configured for serverless deployment with TanStack Start.
 
-## Styling
+## 🤝 Contributing
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+Contributions are welcome! Please follow these steps:
 
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
 
+## 📝 License
 
-## T3Env
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-- You can use T3Env to add type safety to your environment variables.
-- Add Environment variables to the `src/env.mjs` file.
-- Use the environment variables in your code.
+## 🙏 Acknowledgments
 
-### Usage
+- [TanStack](https://tanstack.com/) for amazing React libraries
+- [shadcn/ui](https://ui.shadcn.com/) for beautiful UI components
+- [Better Auth](https://better-auth.com/) for authentication
+- [ORPC](https://orpc.io/) for type-safe APIs
+- [Prisma](https://www.prisma.io/) for database tooling
 
-```ts
-import { env } from "@/env";
+## 📧 Support
 
-console.log(env.VITE_APP_TITLE);
-```
+For support, email support@linkdrop.com or open an issue on GitHub.
 
+---
 
-
-
-
-
-## Routing
-This project uses [TanStack Router](https://tanstack.com/router). The initial setup is a file based router. Which means that the routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add another a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you use the `<Outlet />` component.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-
-import { Link } from "@tanstack/react-router";
-
-export const Route = createRootRoute({
-  component: () => (
-    <>
-      <header>
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-        </nav>
-      </header>
-      <Outlet />
-      <TanStackRouterDevtools />
-    </>
-  ),
-})
-```
-
-The `<TanStackRouterDevtools />` component is not required so you can remove it if you don't want it in your layout.
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-const peopleRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/people",
-  loader: async () => {
-    const response = await fetch("https://swapi.dev/api/people");
-    return response.json() as Promise<{
-      results: {
-        name: string;
-      }[];
-    }>;
-  },
-  component: () => {
-    const data = peopleRoute.useLoaderData();
-    return (
-      <ul>
-        {data.results.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    );
-  },
-});
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-### React-Query
-
-React-Query is an excellent addition or alternative to route loading and integrating it into you application is a breeze.
-
-First add your dependencies:
-
-```bash
-pnpm add @tanstack/react-query @tanstack/react-query-devtools
-```
-
-Next we'll need to create a query client and provider. We recommend putting those in `main.tsx`.
-
-```tsx
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-// ...
-
-const queryClient = new QueryClient();
-
-// ...
-
-if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement);
-
-  root.render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  );
-}
-```
-
-You can also add TanStack Query Devtools to the root route (optional).
-
-```tsx
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-
-const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <ReactQueryDevtools buttonPosition="top-right" />
-      <TanStackRouterDevtools />
-    </>
-  ),
-});
-```
-
-Now you can use `useQuery` to fetch your data.
-
-```tsx
-import { useQuery } from "@tanstack/react-query";
-
-import "./App.css";
-
-function App() {
-  const { data } = useQuery({
-    queryKey: ["people"],
-    queryFn: () =>
-      fetch("https://swapi.dev/api/people")
-        .then((res) => res.json())
-        .then((data) => data.results as { name: string }[]),
-    initialData: [],
-  });
-
-  return (
-    <div>
-      <ul>
-        {data.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export default App;
-```
-
-You can find out everything you need to know on how to use React-Query in the [React-Query documentation](https://tanstack.com/query/latest/docs/framework/react/overview).
-
-## State Management
-
-Another common requirement for React applications is state management. There are many options for state management in React. TanStack Store provides a great starting point for your project.
-
-First you need to add TanStack Store as a dependency:
-
-```bash
-pnpm add @tanstack/store
-```
-
-Now let's create a simple counter in the `src/App.tsx` file as a demonstration.
-
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-function App() {
-  const count = useStore(countStore);
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-    </div>
-  );
-}
-
-export default App;
-```
-
-One of the many nice features of TanStack Store is the ability to derive state from other state. That derived state will update when the base state updates.
-
-Let's check this out by doubling the count using derived state.
-
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store, Derived } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-const doubledStore = new Derived({
-  fn: () => countStore.state * 2,
-  deps: [countStore],
-});
-doubledStore.mount();
-
-function App() {
-  const count = useStore(countStore);
-  const doubledCount = useStore(doubledStore);
-
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-      <div>Doubled - {doubledCount}</div>
-    </div>
-  );
-}
-
-export default App;
-```
-
-We use the `Derived` class to create a new store that is derived from another store. The `Derived` class has a `mount` method that will start the derived store updating.
-
-Once we've created the derived store we can use it in the `App` component just like we would any other store using the `useStore` hook.
-
-You can find out everything you need to know on how to use TanStack Store in the [TanStack Store documentation](https://tanstack.com/store/latest).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+Made with ❤️ by [Your Name]
