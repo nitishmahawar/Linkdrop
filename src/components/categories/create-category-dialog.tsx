@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -23,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { Switch } from "@/components/ui/switch";
 
 const formSchema = z.object({
   name: z.string().min(1, { error: "Category name is required" }),
@@ -59,6 +61,7 @@ export const CreateCategoryDialog = ({
   open,
   onOpenChange,
 }: CreateCategoryDialogProps) => {
+  const [createMore, setCreateMore] = useState(false);
   const queryClient = useQueryClient();
 
   const form = useForm<FormValues>({
@@ -74,8 +77,15 @@ export const CreateCategoryDialog = ({
       onSuccess: () => {
         toast.success("Category created successfully!");
         queryClient.invalidateQueries({ queryKey: orpc.categories.list.key() });
-        onOpenChange(false);
-        form.reset();
+
+        if (createMore) {
+          // Keep dialog open and reset form
+          form.reset();
+        } else {
+          // Close dialog and reset form
+          onOpenChange(false);
+          form.reset();
+        }
       },
       onError: (error) => {
         toast.error(error.message);
@@ -157,19 +167,35 @@ export const CreateCategoryDialog = ({
               )}
             />
 
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={createMutation.isPending}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending && <Spinner />}
-                Create Category
-              </Button>
+            <DialogFooter className="flex-col sm:flex-row gap-4">
+              <div className="flex items-center gap-2 mr-auto">
+                <Switch
+                  id="create-more"
+                  checked={createMore}
+                  onCheckedChange={setCreateMore}
+                  disabled={createMutation.isPending}
+                />
+                <label
+                  htmlFor="create-more"
+                  className="text-sm font-medium cursor-pointer"
+                >
+                  Create more
+                </label>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                  disabled={createMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createMutation.isPending}>
+                  {createMutation.isPending && <Spinner />}
+                  Create Category
+                </Button>
+              </div>
             </DialogFooter>
           </form>
         </Form>

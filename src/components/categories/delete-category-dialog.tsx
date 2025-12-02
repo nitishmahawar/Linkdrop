@@ -34,6 +34,7 @@ export const DeleteCategoryDialog = ({
       onSuccess: () => {
         toast.success("Category deleted successfully!");
         queryClient.invalidateQueries({ queryKey: orpc.categories.list.key() });
+        queryClient.invalidateQueries({ queryKey: orpc.links.list.key() });
         onOpenChange(false);
       },
       onError: (error) => {

@@ -34,6 +34,7 @@ export const DeleteTagDialog = ({
       onSuccess: () => {
         toast.success("Tag deleted successfully!");
         queryClient.invalidateQueries({ queryKey: orpc.tags.list.key() });
+        queryClient.invalidateQueries({ queryKey: orpc.links.list.key() });
         onOpenChange(false);
       },
       onError: (error) => {

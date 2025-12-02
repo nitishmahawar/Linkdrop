@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { orpc } from "@/orpc/client";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,26 +12,45 @@ import { LinkCard } from "./link-card";
 import { LinkListItem } from "./link-list-item";
 import { EmptyLinks } from "./empty-links";
 import { LinksSkeleton } from "./links-skeleton";
-import { useState } from "react";
-import { Search, Grid3x3, List } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Grid3x3, List, Loader2 } from "lucide-react";
+import { useInView } from "react-intersection-observer";
 
 type ViewMode = "grid" | "list";
 
 export const LinksList = () => {
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const { ref, inView } = useInView();
 
-  const linksQuery = useQuery(
-    orpc.links.list.queryOptions({
-      input: {
+  const linksQuery = useInfiniteQuery(
+    orpc.links.list.infiniteOptions({
+      input: (pageParam) => ({
+        offset: pageParam,
         search: search || undefined,
-        limit: 50,
-        offset: 0,
+        limit: 20,
         sortBy: "createdAt",
         sortOrder: "desc",
+      }),
+      initialPageParam: 0,
+      getNextPageParam: (lastPage) => {
+        if (lastPage.hasMore) {
+          return lastPage.offset + lastPage.limit;
+        }
+        return undefined;
       },
     })
   );
+
+  // Fetch next page when the sentinel element is in view
+  useEffect(() => {
+    if (inView && linksQuery.hasNextPage && !linksQuery.isFetchingNextPage) {
+      linksQuery.fetchNextPage();
+    }
+  }, [inView, linksQuery]);
+
+  // Get all links from all pages
+  const allLinks = linksQuery.data?.pages.flatMap((page) => page.links) ?? [];
 
   return (
     <div className="space-y-6">
@@ -78,7 +97,7 @@ export const LinksList = () => {
 
       {linksQuery.isSuccess && (
         <>
-          {linksQuery.data.links.length === 0 ? (
+          {allLinks.length === 0 ? (
             <EmptyLinks hasSearch={!!search} />
           ) : (
             <>
@@ -89,7 +108,7 @@ export const LinksList = () => {
                     : "space-y-4"
                 }
               >
-                {linksQuery.data.links.map((link) =>
+                {allLinks.map((link) =>
                   viewMode === "grid" ? (
                     <LinkCard key={link.id} link={link} />
                   ) : (
@@ -98,18 +117,33 @@ export const LinksList = () => {
                 )}
               </div>
 
-              {/* Pagination Info */}
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                {/* <p>
-                  Showing {linksQuery.data.links.length} of{" "}
-                  {linksQuery.data.total} links
-                </p> */}
-                {linksQuery.data.hasMore && (
-                  <Button variant="outline" size="sm">
+              {/* Infinite scroll sentinel */}
+              {linksQuery.hasNextPage && (
+                <div
+                  ref={ref}
+                  className="flex items-center justify-center py-8"
+                >
+                  {linksQuery.isFetchingNextPage && (
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Loading more links...
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Manual load more button (fallback) */}
+              {!linksQuery.isFetchingNextPage && linksQuery.hasNextPage && (
+                <div className="flex items-center justify-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => linksQuery.fetchNextPage()}
+                  >
                     Load More
                   </Button>
-                )}
-              </div>
+                </div>
+              )}
             </>
           )}
         </>
