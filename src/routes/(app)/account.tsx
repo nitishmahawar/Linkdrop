@@ -26,9 +26,14 @@ import {
   Key,
   Download,
   Trash2,
+  Monitor,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useState } from "react";
+import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/(app)/account")({
   component: Account,
@@ -36,6 +41,7 @@ export const Route = createFileRoute("/(app)/account")({
 
 function Account() {
   const user = Route.useRouteContext().user;
+  const { theme, setTheme } = useTheme();
 
   const linksQuery = useQuery(
     orpc.links.list.queryOptions({
@@ -44,6 +50,27 @@ function Account() {
   );
 
   const linksCount = linksQuery.data?.total || 0;
+
+  const themeOptions = [
+    {
+      value: "light",
+      label: "Light",
+      icon: Sun,
+      description: "Light mode",
+    },
+    {
+      value: "dark",
+      label: "Dark",
+      icon: Moon,
+      description: "Dark mode",
+    },
+    {
+      value: "system",
+      label: "System",
+      icon: Monitor,
+      description: "Follow system preference",
+    },
+  ] as const;
 
   return (
     <div className="space-y-6">
@@ -142,6 +169,149 @@ function Account() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Theme Preferences */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Theme Preferences</CardTitle>
+          <CardDescription>Choose your preferred color theme</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 max-w-2xl">
+            {themeOptions.map((option) => {
+              const Icon = option.icon;
+              const isActive = theme === option.value;
+
+              return (
+                <div key={option.value} className="space-y-3">
+                  {/* UI Mockup Card */}
+                  <button
+                    onClick={() => setTheme(option.value)}
+                    className={cn(
+                      "group relative w-full overflow-hidden rounded-lg border-2 transition-all hover:border-primary/50",
+                      isActive
+                        ? "border-primary ring-2 ring-primary/20"
+                        : "border-border hover:bg-accent/50"
+                    )}
+                  >
+                    {/* 16:9 Aspect Ratio Container */}
+                    <div className="aspect-video w-full">
+                      {/* Light Theme Mockup */}
+                      {option.value === "light" && (
+                        <div className="h-full w-full bg-white p-3">
+                          <div className="mb-2 flex items-center gap-1.5">
+                            <div className="h-2 w-2 rounded-full bg-red-400" />
+                            <div className="h-2 w-2 rounded-full bg-yellow-400" />
+                            <div className="h-2 w-2 rounded-full bg-green-400" />
+                          </div>
+                          <div className="space-y-2">
+                            <div className="h-3 w-full rounded bg-gray-200" />
+                            <div className="flex gap-2">
+                              <div className="h-16 w-1/4 rounded bg-gray-100 border border-gray-200" />
+                              <div className="flex-1 space-y-2">
+                                <div className="h-3 w-3/4 rounded bg-gray-200" />
+                                <div className="h-3 w-1/2 rounded bg-gray-100" />
+                                <div className="h-3 w-2/3 rounded bg-gray-200" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Dark Theme Mockup */}
+                      {option.value === "dark" && (
+                        <div className="h-full w-full bg-zinc-950 p-3">
+                          <div className="mb-2 flex items-center gap-1.5">
+                            <div className="h-2 w-2 rounded-full bg-red-400" />
+                            <div className="h-2 w-2 rounded-full bg-yellow-400" />
+                            <div className="h-2 w-2 rounded-full bg-green-400" />
+                          </div>
+                          <div className="space-y-2">
+                            <div className="h-3 w-full rounded bg-zinc-800" />
+                            <div className="flex gap-2">
+                              <div className="h-16 w-1/4 rounded bg-zinc-900 border border-zinc-800" />
+                              <div className="flex-1 space-y-2">
+                                <div className="h-3 w-3/4 rounded bg-zinc-800" />
+                                <div className="h-3 w-1/2 rounded bg-zinc-900" />
+                                <div className="h-3 w-2/3 rounded bg-zinc-800" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* System Theme Mockup */}
+                      {option.value === "system" && (
+                        <div className="flex h-full w-full">
+                          {/* Light Half */}
+                          <div className="w-1/2 bg-white p-2 border-r">
+                            <div className="mb-1.5 flex items-center gap-1">
+                              <div className="h-1.5 w-1.5 rounded-full bg-red-400" />
+                              <div className="h-1.5 w-1.5 rounded-full bg-yellow-400" />
+                            </div>
+                            <div className="space-y-1.5">
+                              <div className="h-2 w-full rounded bg-gray-200" />
+                              <div className="flex gap-1">
+                                <div className="h-10 w-1/3 rounded bg-gray-100" />
+                                <div className="flex-1 space-y-1">
+                                  <div className="h-2 w-full rounded bg-gray-200" />
+                                  <div className="h-2 w-2/3 rounded bg-gray-100" />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          {/* Dark Half */}
+                          <div className="w-1/2 bg-zinc-950 p-2">
+                            <div className="mb-1.5 flex items-center gap-1">
+                              <div className="h-1.5 w-1.5 rounded-full bg-red-400" />
+                              <div className="h-1.5 w-1.5 rounded-full bg-yellow-400" />
+                            </div>
+                            <div className="space-y-1.5">
+                              <div className="h-2 w-full rounded bg-zinc-800" />
+                              <div className="flex gap-1">
+                                <div className="h-10 w-1/3 rounded bg-zinc-900" />
+                                <div className="flex-1 space-y-1">
+                                  <div className="h-2 w-full rounded bg-zinc-800" />
+                                  <div className="h-2 w-2/3 rounded bg-zinc-900" />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Active Indicator */}
+                    {isActive && (
+                      <div className="absolute right-3 top-3">
+                        <div className="h-2.5 w-2.5 rounded-full bg-primary shadow-lg" />
+                      </div>
+                    )}
+                  </button>
+
+                  {/* Theme Info - Outside the card */}
+                  <div className="flex items-center gap-2 px-1">
+                    <Icon
+                      className={cn(
+                        "h-4 w-4 transition-colors",
+                        isActive ? "text-primary" : "text-muted-foreground"
+                      )}
+                    />
+                    <div
+                      className={cn(
+                        "font-medium text-sm transition-colors",
+                        isActive ? "text-primary" : "text-foreground"
+                      )}
+                    >
+                      {option.label}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Account Actions */}
       <Card>

@@ -1,6 +1,6 @@
 import { protectedProcedure } from "@/orpc";
 import { prisma } from "@/lib/prisma";
-import { ORPCError } from "@orpc/server";
+import { InferRouterOutputs, ORPCError } from "@orpc/server";
 import {
   createTagSchema,
   updateTagSchema,
@@ -47,13 +47,6 @@ export const tagsRouter = {
           ...(search && {
             name: { contains: search, mode: "insensitive" },
           }),
-        },
-        include: {
-          linkTags: {
-            include: {
-              link: true,
-            },
-          },
         },
         orderBy: {
           createdAt: "desc",
@@ -149,3 +142,5 @@ export const tagsRouter = {
       return { success: true, id: input.id };
     }),
 };
+
+export type Tag = InferRouterOutputs<typeof tagsRouter>["list"][number];

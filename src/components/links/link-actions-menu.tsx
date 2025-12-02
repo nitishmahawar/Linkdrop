@@ -93,7 +93,7 @@ export const LinkActionsMenu = ({ link }: LinkActionsMenuProps) => {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              className="text-destructive"
+              variant="destructive"
               onClick={() => setDeleteOpen(true)}
             >
               <Trash2 />

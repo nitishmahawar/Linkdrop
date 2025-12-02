@@ -113,14 +113,20 @@ export const LinkCard = ({ link }: LinkCardProps) => {
         <div className="flex flex-wrap gap-1.5">
           {link.linkCategories && link.linkCategories.length > 0 && (
             <>
-              {link.linkCategories.map((lc: any) => (
+              {link.linkCategories.map((lc) => (
                 <Badge
                   key={lc.categoryId}
                   variant="secondary"
-                  className="text-xs font-medium hover:bg-secondary/80 transition-colors"
+                  className="text-xs font-medium hover:bg-secondary/80 transition-colors flex items-center gap-1.5"
                   data-badge
                   onClick={(e) => e.stopPropagation()}
                 >
+                  {lc.category.color && (
+                    <span
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ backgroundColor: lc.category.color }}
+                    />
+                  )}
                   {lc.category.name}
                 </Badge>
               ))}
@@ -129,7 +135,7 @@ export const LinkCard = ({ link }: LinkCardProps) => {
 
           {link.linkTags && link.linkTags.length > 0 && (
             <>
-              {link.linkTags.map((lt: any) => (
+              {link.linkTags.map((lt) => (
                 <Badge
                   key={lt.tagId}
                   variant="outline"

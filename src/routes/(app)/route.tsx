@@ -7,10 +7,9 @@ export const Route = createFileRoute("/(app)")({
 
 function RouteComponent() {
   return (
-    <div className="space-y-6">
+    <div>
       <Header />
-
-      <div className="px-4 sm:px-6 md:px-8 lg:px-12">
+      <div className="px-4 sm:px-6 md:px-8 lg:px-12 pt-4 pb-6">
         <Outlet />
       </div>
     </div>

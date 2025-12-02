@@ -26,8 +26,21 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Link as LinkIcon, Sparkles } from "lucide-react";
+import { Link as LinkIcon, Sparkles, Plus } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
+import { Switch } from "@/components/ui/switch";
+import { Card } from "@/components/ui/card";
+import {
+  MultiSelect,
+  MultiSelectContent,
+  MultiSelectGroup,
+  MultiSelectItem,
+  MultiSelectSeparator,
+  MultiSelectTrigger,
+  MultiSelectValue,
+} from "@/components/ui/multi-select";
+import { CreateCategoryDialog } from "@/components/categories/create-category-dialog";
+import { CreateTagDialog } from "@/components/tags/create-tag-dialog";
 
 const formSchema = z.object({
   url: z.url({ error: "Please enter a valid URL" }),
@@ -50,6 +63,9 @@ interface CreateLinkDialogProps {
 export const CreateLinkDialog = ({ trigger }: CreateLinkDialogProps) => {
   const [open, setOpen] = useState(false);
   const [urlToFetch, setUrlToFetch] = useState<string | null>(null);
+  const [createMore, setCreateMore] = useState(false);
+  const [createCategoryOpen, setCreateCategoryOpen] = useState(false);
+  const [createTagOpen, setCreateTagOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const form = useForm<FormValues>({
@@ -66,6 +82,20 @@ export const CreateLinkDialog = ({ trigger }: CreateLinkDialogProps) => {
       tagIds: [],
     },
   });
+
+  // Fetch categories
+  const categoriesQuery = useQuery(
+    orpc.categories.list.queryOptions({
+      input: {},
+    })
+  );
+
+  // Fetch tags
+  const tagsQuery = useQuery(
+    orpc.tags.list.queryOptions({
+      input: {},
+    })
+  );
 
   // Fetch metadata using useQuery
   const metadataQuery = useQuery({
@@ -106,8 +136,15 @@ export const CreateLinkDialog = ({ trigger }: CreateLinkDialogProps) => {
       onSuccess: () => {
         toast.success("Link created successfully!");
         queryClient.invalidateQueries({ queryKey: orpc.links.list.key() });
-        setOpen(false);
-        form.reset();
+
+        if (createMore) {
+          // Keep dialog open and reset form
+          form.reset();
+        } else {
+          // Close dialog and reset form
+          setOpen(false);
+          form.reset();
+        }
       },
       onError: (error) => {
         console.log(error);
@@ -208,6 +245,42 @@ export const CreateLinkDialog = ({ trigger }: CreateLinkDialogProps) => {
               )}
             />
 
+            {/* Metadata Preview */}
+            {(form.watch("faviconUrl") || form.watch("previewImageUrl")) && (
+              <Card className="p-4">
+                <div className="flex items-start gap-4">
+                  {form.watch("faviconUrl") && (
+                    <img
+                      src={form.watch("faviconUrl")}
+                      alt="Favicon"
+                      className="h-8 w-8 shrink-0 rounded"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  )}
+                  <div className="flex-1 min-w-0 overflow-hidden">
+                    <p className="font-medium text-sm line-clamp-1">
+                      {form.watch("title") || "No title"}
+                    </p>
+                    <p className="text-xs text-muted-foreground line-clamp-2">
+                      {form.watch("description") || "No description"}
+                    </p>
+                  </div>
+                  {form.watch("previewImageUrl") && (
+                    <img
+                      src={form.watch("previewImageUrl")}
+                      alt="Preview"
+                      className="h-16 w-24 shrink-0 rounded object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  )}
+                </div>
+              </Card>
+            )}
+
             {/* Title Field */}
             <FormField
               control={form.control}
@@ -267,23 +340,160 @@ export const CreateLinkDialog = ({ trigger }: CreateLinkDialogProps) => {
               )}
             />
 
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-                disabled={createMutation.isPending}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={createMutation.isPending}>
-                {createMutation.isPending && <Spinner />}
-                Create Link
-              </Button>
+            {/* Categories Multi-Select */}
+            <FormField
+              control={form.control}
+              name="categoryIds"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Categories</FormLabel>
+                  <FormControl>
+                    <MultiSelect
+                      values={field.value}
+                      onValuesChange={field.onChange}
+                    >
+                      <MultiSelectTrigger className="w-full">
+                        <MultiSelectValue placeholder="Select categories..." />
+                      </MultiSelectTrigger>
+                      <MultiSelectContent
+                        search={{
+                          placeholder: "Search categories...",
+                          emptyMessage: "No categories found",
+                        }}
+                      >
+                        <MultiSelectGroup>
+                          {categoriesQuery.data?.map((category) => (
+                            <MultiSelectItem
+                              key={category.id}
+                              value={category.id}
+                            >
+                              <div
+                                data-slot="color"
+                                className="size-2.5 rounded-full"
+                                style={{ backgroundColor: category.color! }}
+                              ></div>
+                              {category.name}
+                            </MultiSelectItem>
+                          ))}
+                        </MultiSelectGroup>
+                        <MultiSelectSeparator />
+                        <MultiSelectGroup>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="w-full"
+                            onClick={() => setCreateCategoryOpen(true)}
+                          >
+                            <Plus className="h-4 w-4" />
+                            New Category
+                          </Button>
+                        </MultiSelectGroup>
+                      </MultiSelectContent>
+                    </MultiSelect>
+                  </FormControl>
+                  <FormDescription>
+                    Organize your link with categories
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Tags Multi-Select */}
+            <FormField
+              control={form.control}
+              name="tagIds"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tags</FormLabel>
+                  <FormControl>
+                    <MultiSelect
+                      values={field.value}
+                      onValuesChange={field.onChange}
+                    >
+                      <MultiSelectTrigger className="w-full">
+                        <MultiSelectValue placeholder="Select tags..." />
+                      </MultiSelectTrigger>
+                      <MultiSelectContent
+                        search={{
+                          placeholder: "Search tags...",
+                          emptyMessage: "No tags found",
+                        }}
+                      >
+                        <MultiSelectGroup>
+                          {tagsQuery.data?.map((tag) => (
+                            <MultiSelectItem key={tag.id} value={tag.id}>
+                              {tag.name}
+                            </MultiSelectItem>
+                          ))}
+                        </MultiSelectGroup>
+                        <MultiSelectSeparator />
+                        <MultiSelectGroup>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="w-full"
+                            onClick={() => setCreateTagOpen(true)}
+                          >
+                            <Plus className="h-4 w-4" />
+                            New Tag
+                          </Button>
+                        </MultiSelectGroup>
+                      </MultiSelectContent>
+                    </MultiSelect>
+                  </FormControl>
+                  <FormDescription>
+                    Add tags to help find this link later
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <DialogFooter className="flex-col sm:flex-row gap-4">
+              <div className="flex items-center gap-2 mr-auto">
+                <Switch
+                  id="create-more"
+                  checked={createMore}
+                  onCheckedChange={setCreateMore}
+                  disabled={createMutation.isPending}
+                />
+                <label
+                  htmlFor="create-more"
+                  className="text-sm font-medium cursor-pointer"
+                >
+                  Create more
+                </label>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setOpen(false)}
+                  disabled={createMutation.isPending}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={createMutation.isPending}>
+                  {createMutation.isPending && <Spinner />}
+                  Create Link
+                </Button>
+              </div>
             </DialogFooter>
           </form>
         </Form>
       </DialogContent>
+
+      {/* Create Category Dialog */}
+      <CreateCategoryDialog
+        open={createCategoryOpen}
+        onOpenChange={setCreateCategoryOpen}
+      />
+
+      {/* Create Tag Dialog */}
+      <CreateTagDialog open={createTagOpen} onOpenChange={setCreateTagOpen} />
     </Dialog>
   );
 };

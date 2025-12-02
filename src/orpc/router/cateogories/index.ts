@@ -1,6 +1,6 @@
 import { protectedProcedure } from "@/orpc";
 import { prisma } from "@/lib/prisma";
-import { ORPCError } from "@orpc/server";
+import { InferRouterOutputs, ORPCError } from "@orpc/server";
 import {
   createCategorySchema,
   updateCategorySchema,
@@ -48,13 +48,7 @@ export const categoriesRouter = {
             name: { contains: search, mode: "insensitive" },
           }),
         },
-        include: {
-          linkCategories: {
-            include: {
-              link: true,
-            },
-          },
-        },
+
         orderBy: {
           createdAt: "desc",
         },
@@ -149,3 +143,7 @@ export const categoriesRouter = {
       return { success: true, id: input.id };
     }),
 };
+
+export type Category = InferRouterOutputs<
+  typeof categoriesRouter
+>["list"][number];
