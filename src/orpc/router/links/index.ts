@@ -64,8 +64,8 @@ export const linksRouter = {
       const userId = context.session.user.id;
       const {
         search,
-        categoryId,
-        tagId,
+        categoryIds,
+        tagIds,
         isFavorite,
         limit,
         offset,
@@ -85,20 +85,22 @@ export const linksRouter = {
               { url: { contains: search, mode: "insensitive" } },
             ],
           }),
-          ...(categoryId && {
-            linkCategories: {
-              some: {
-                categoryId,
+          ...(categoryIds &&
+            categoryIds.length > 0 && {
+              linkCategories: {
+                some: {
+                  categoryId: { in: categoryIds },
+                },
               },
-            },
-          }),
-          ...(tagId && {
-            linkTags: {
-              some: {
-                tagId,
+            }),
+          ...(tagIds &&
+            tagIds.length > 0 && {
+              linkTags: {
+                some: {
+                  tagId: { in: tagIds },
+                },
               },
-            },
-          }),
+            }),
           ...(isFavorite !== undefined && { isFavorite }),
         },
       });
@@ -115,20 +117,22 @@ export const linksRouter = {
               { url: { contains: search, mode: "insensitive" } },
             ],
           }),
-          ...(categoryId && {
-            linkCategories: {
-              some: {
-                categoryId,
+          ...(categoryIds &&
+            categoryIds.length > 0 && {
+              linkCategories: {
+                some: {
+                  categoryId: { in: categoryIds },
+                },
               },
-            },
-          }),
-          ...(tagId && {
-            linkTags: {
-              some: {
-                tagId,
+            }),
+          ...(tagIds &&
+            tagIds.length > 0 && {
+              linkTags: {
+                some: {
+                  tagId: { in: tagIds },
+                },
               },
-            },
-          }),
+            }),
           ...(isFavorite !== undefined && { isFavorite }),
         },
         include: {

@@ -46,6 +46,42 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content:
           "Save and organize your links with automatic metadata fetching, categories, and tags",
       },
+      // OpenGraph meta tags
+      {
+        property: "og:title",
+        content: "Linkdrop - Save and Organize Your Links",
+      },
+      {
+        property: "og:description",
+        content:
+          "Save and organize your links with automatic metadata fetching, categories, and tags",
+      },
+      {
+        property: "og:image",
+        content: "/og-image.png",
+      },
+      {
+        property: "og:type",
+        content: "website",
+      },
+      // Twitter Card meta tags
+      {
+        name: "twitter:card",
+        content: "summary_large_image",
+      },
+      {
+        name: "twitter:title",
+        content: "Linkdrop - Save and Organize Your Links",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "Save and organize your links with automatic metadata fetching, categories, and tags",
+      },
+      {
+        name: "twitter:image",
+        content: "/og-image.png",
+      },
     ],
     links: [
       {

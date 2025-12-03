@@ -40,8 +40,8 @@ export const deleteLinkSchema = z.object({
 // Get All Links Schema (with filters)
 export const getLinksSchema = z.object({
   search: z.string().optional(),
-  categoryId: z.string().optional(),
-  tagId: z.string().optional(),
+  categoryIds: z.array(z.string()).optional(),
+  tagIds: z.array(z.string()).optional(),
   isFavorite: z.boolean().optional(),
   limit: z.number().min(1).max(100).default(50),
   offset: z.number().min(0).default(0),

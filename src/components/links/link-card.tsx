@@ -28,17 +28,14 @@ export const LinkCard = ({ link }: LinkCardProps) => {
       {/* Preview Image or Gradient Placeholder */}
       <div className="relative h-48 overflow-hidden bg-linear-to-br from-primary/10 via-primary/5 to-background">
         {link.previewImageUrl ? (
-          <>
-            <img
-              src={link.previewImageUrl}
-              alt={link.title}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
-            />
-            <div className="absolute inset-0 bg-linear-to-t from-background/80 to-transparent" />
-          </>
+          <img
+            src={link.previewImageUrl}
+            alt={link.title}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
+          />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-8xl font-bold text-primary/10 select-none">
