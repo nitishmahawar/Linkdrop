@@ -46,6 +46,7 @@ export const ManageDialog = () => {
   const categoriesQuery = useQuery(
     orpc.categories.list.queryOptions({
       input: {},
+      enabled: open,
     })
   );
 
@@ -53,6 +54,7 @@ export const ManageDialog = () => {
   const tagsQuery = useQuery(
     orpc.tags.list.queryOptions({
       input: {},
+      enabled: open,
     })
   );
 

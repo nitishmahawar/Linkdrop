@@ -12,6 +12,8 @@ import { LinkCard } from "./link-card";
 import { LinkListItem } from "./link-list-item";
 import { EmptyLinks } from "./empty-links";
 import { LinksSkeleton } from "./links-skeleton";
+import { CategoryFilter } from "./category-filter";
+import { TagFilter } from "./tag-filter";
 import { useState, useEffect } from "react";
 import { Search, Grid3x3, List, Loader2 } from "lucide-react";
 import { useInView } from "react-intersection-observer";
@@ -21,6 +23,8 @@ type ViewMode = "grid" | "list";
 export const LinksList = () => {
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const { ref, inView } = useInView();
 
   const linksQuery = useInfiniteQuery(
@@ -28,6 +32,9 @@ export const LinksList = () => {
       input: (pageParam) => ({
         offset: pageParam,
         search: search || undefined,
+        categoryIds:
+          selectedCategoryIds.length > 0 ? selectedCategoryIds : undefined,
+        tagIds: selectedTagIds.length > 0 ? selectedTagIds : undefined,
         limit: 20,
         sortBy: "createdAt",
         sortOrder: "desc",
@@ -54,17 +61,29 @@ export const LinksList = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <InputGroup className="flex-1 max-w-xs">
-          <InputGroupAddon>
-            <Search />
-          </InputGroupAddon>
-          <InputGroupInput
-            placeholder="Search links..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+      {/* Search, Filters and View Mode */}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-3 flex-1 flex-wrap">
+          <InputGroup className="flex-1 max-w-xs min-w-[200px]">
+            <InputGroupAddon>
+              <Search />
+            </InputGroupAddon>
+            <InputGroupInput
+              placeholder="Search links..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </InputGroup>
+
+          <CategoryFilter
+            selectedCategoryIds={selectedCategoryIds}
+            onCategoryChange={setSelectedCategoryIds}
           />
-        </InputGroup>
+          <TagFilter
+            selectedTagIds={selectedTagIds}
+            onTagChange={setSelectedTagIds}
+          />
+        </div>
 
         <Tabs
           value={viewMode}
