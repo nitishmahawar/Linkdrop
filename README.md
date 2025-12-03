@@ -19,24 +19,35 @@ A modern, feature-rich bookmark manager built with React, TanStack Start, and Pr
 
 - **Categories**: Create custom categories with optional colors
 - **Tags**: Add multiple tags to links for flexible organization
+- **Multi-Select Filters**: Advanced combobox filters for categories and tags with search
+- **Favorites Filter**: Quick toggle to show only favorite links
 - **Search**: Powerful search across titles, descriptions, notes, and URLs
-- **Filters**: Filter by category, tags, or favorites
+- **Combined Filtering**: Use multiple filters simultaneously (categories + tags + favorites + search)
 - **Sorting**: Sort by creation date, update date, or title
 
 ### 🎨 User Interface
 
 - **Dual View Modes**: Switch between grid and list views
 - **Responsive Design**: Fully responsive layout (1-4 columns on different screen sizes)
+- **Infinite Scroll**: Seamless pagination with automatic loading as you scroll
 - **Dark/Light Mode**: Theme support with next-themes
-- **Beautiful Cards**: Enhanced link cards with gradient placeholders and hover effects
+- **Beautiful Cards**: Enhanced link cards with preview images and hover effects
 - **Skeleton Loading**: Smooth loading states with skeleton screens
 - **Toast Notifications**: User-friendly feedback with Sonner
+- **Multi-Select Combobox**: Searchable dropdown filters with checkboxes
 
 ### 🔐 Authentication
 
 - **Google OAuth**: Sign in with Google using Better Auth
 - **Session Management**: Secure session handling with JWT
 - **Protected Routes**: Automatic authentication checks
+
+### 🌐 SEO & Social Sharing
+
+- **OpenGraph Meta Tags**: Rich social media previews
+- **Twitter Card Support**: Optimized Twitter sharing
+- **Custom OG Image**: Professional preview image for social platforms
+- **SEO Optimized**: Proper meta tags for search engines
 
 ## 🛠️ Tech Stack
 
@@ -77,7 +88,7 @@ A modern, feature-rich bookmark manager built with React, TanStack Start, and Pr
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/linkdrop.git
+git clone https://github.com/nitishmahawar/Linkdrop.git
 cd linkdrop
 ```
 
@@ -259,6 +270,27 @@ Each link card features:
 - Category and tag badges
 - Action menu (edit, delete, favorite)
 
+### Advanced Filtering System
+
+Linkdrop provides powerful filtering capabilities:
+
+- **Multi-Select Combobox**: Select multiple categories or tags at once
+- **Search Within Filters**: Quickly find categories/tags with built-in search
+- **Visual Indicators**: Color-coded categories and hashtag-prefixed tags
+- **Combined Filters**: Use categories, tags, favorites, and search simultaneously
+- **Real-time Updates**: Filters apply instantly with optimized queries
+- **Persistent State**: Filter selections are maintained during your session
+
+### Infinite Scroll
+
+Seamless browsing experience:
+
+- Automatically loads more links as you scroll
+- Configurable page size (20 links per page)
+- Loading indicators for next page
+- Fallback "Load More" button
+- Optimized performance with React Query caching
+
 ## 🎨 Customization
 
 ### Adding New UI Components
@@ -338,12 +370,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [TanStack](https://tanstack.com/) for amazing React libraries
 - [shadcn/ui](https://ui.shadcn.com/) for beautiful UI components
 - [Better Auth](https://better-auth.com/) for authentication
-- [ORPC](https://orpc.io/) for type-safe APIs
+- [ORPC](https://orpc.dev/) for type-safe APIs
 - [Prisma](https://www.prisma.io/) for database tooling
 
 ## 📧 Support
 
-For support, email support@linkdrop.com or open an issue on GitHub.
+For support, email nitishmahawar.dev@gmail.com or open an issue on GitHub.
 
 ---
 
