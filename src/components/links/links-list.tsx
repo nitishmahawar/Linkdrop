@@ -15,7 +15,7 @@ import { LinksSkeleton } from "./links-skeleton";
 import { CategoryFilter } from "./category-filter";
 import { TagFilter } from "./tag-filter";
 import { useState, useEffect } from "react";
-import { Search, Grid3x3, List, Loader2 } from "lucide-react";
+import { Search, Grid3x3, List, Loader2, Star } from "lucide-react";
 import { useInView } from "react-intersection-observer";
 
 type ViewMode = "grid" | "list";
@@ -25,6 +25,7 @@ export const LinksList = () => {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [isFavorite, setIsFavorite] = useState<boolean | undefined>(undefined);
   const { ref, inView } = useInView();
 
   const linksQuery = useInfiniteQuery(
@@ -35,6 +36,7 @@ export const LinksList = () => {
         categoryIds:
           selectedCategoryIds.length > 0 ? selectedCategoryIds : undefined,
         tagIds: selectedTagIds.length > 0 ? selectedTagIds : undefined,
+        isFavorite: isFavorite,
         limit: 20,
         sortBy: "createdAt",
         sortOrder: "desc",
@@ -83,6 +85,13 @@ export const LinksList = () => {
             selectedTagIds={selectedTagIds}
             onTagChange={setSelectedTagIds}
           />
+          <Button
+            variant={isFavorite ? "default" : "outline"}
+            onClick={() => setIsFavorite(isFavorite ? undefined : true)}
+          >
+            <Star className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`} />
+            Favorites
+          </Button>
         </div>
 
         <Tabs
