@@ -92,11 +92,26 @@ export const LinksList = () => {
             <Star className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`} />
             Favorites
           </Button>
+          <Tabs
+            value={viewMode}
+            onValueChange={(value) => setViewMode(value as ViewMode)}
+            className="md:hidden"
+          >
+            <TabsList>
+              <TabsTrigger value="grid">
+                <Grid3x3 className="h-4 w-4" />
+              </TabsTrigger>
+              <TabsTrigger value="list">
+                <List className="h-4 w-4" />
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         <Tabs
           value={viewMode}
           onValueChange={(value) => setViewMode(value as ViewMode)}
+          className="hidden md:block"
         >
           <TabsList>
             <TabsTrigger value="grid">
