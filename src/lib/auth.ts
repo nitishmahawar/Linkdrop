@@ -14,6 +14,11 @@ export const auth = betterAuth({
   advanced: {
     database: { generateId: false },
   },
+  user: {
+    deleteUser: {
+      enabled: true,
+    },
+  },
   session: {
     cookieCache: {
       enabled: true,

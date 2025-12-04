@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { orpc } from "@/orpc/client";
 import { DeleteAccountDialog } from "@/components/delete-account-dialog";
-import { ChangePasswordDialog } from "@/components/change-password-dialog";
+import { ExportDataDialog } from "@/components/export-data-dialog";
 import { EditAccountDialog } from "@/components/edit-account-dialog";
 import {
   User,
@@ -23,15 +23,14 @@ import {
   Tag,
   Folder,
   Edit,
-  Key,
   Download,
   Trash2,
   Monitor,
   Moon,
   Sun,
+  Star,
 } from "lucide-react";
 import { format } from "date-fns";
-import { useState } from "react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 
@@ -43,13 +42,18 @@ function Account() {
   const user = Route.useRouteContext().user;
   const { theme, setTheme } = useTheme();
 
-  const linksQuery = useQuery(
-    orpc.links.list.queryOptions({
-      input: { limit: 1, offset: 0 },
+  const statsQuery = useQuery(
+    orpc.user.getAccountStats.queryOptions({
+      input: {},
     })
   );
 
-  const linksCount = linksQuery.data?.total || 0;
+  const stats = statsQuery.data || {
+    totalLinks: 0,
+    totalCategories: 0,
+    totalTags: 0,
+    favoriteLinks: 0,
+  };
 
   const themeOptions = [
     {
@@ -140,30 +144,28 @@ function Account() {
                   <LinkIcon className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm font-medium">Links</span>
                 </div>
-                <p className="text-2xl font-bold">{linksCount}</p>
+                <p className="text-2xl font-bold">{stats.totalLinks}</p>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Folder className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm font-medium">Categories</span>
                 </div>
-                <p className="text-2xl font-bold">-</p>
+                <p className="text-2xl font-bold">{stats.totalCategories}</p>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <Tag className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm font-medium">Tags</span>
                 </div>
-                <p className="text-2xl font-bold">-</p>
+                <p className="text-2xl font-bold">{stats.totalTags}</p>
               </div>
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm font-medium">Member Since</span>
+                  <Star className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Favorites</span>
                 </div>
-                <p className="text-sm">
-                  {format(new Date(user.createdAt), "MMM yyyy")}
-                </p>
+                <p className="text-2xl font-bold">{stats.favoriteLinks}</p>
               </div>
             </div>
           </CardContent>
@@ -329,18 +331,15 @@ function Account() {
                 </Button>
               }
             />
-            <ChangePasswordDialog
+
+            <ExportDataDialog
               trigger={
                 <Button variant="outline">
-                  <Key />
-                  Change Password
+                  <Download />
+                  Export Data
                 </Button>
               }
             />
-            <Button variant="outline">
-              <Download />
-              Export Data
-            </Button>
             <DeleteAccountDialog
               trigger={
                 <Button variant="destructive">

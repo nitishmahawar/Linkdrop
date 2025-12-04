@@ -13,8 +13,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { AlertTriangle } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
@@ -25,14 +23,11 @@ interface DeleteAccountDialogProps {
 
 export const DeleteAccountDialog = ({ trigger }: DeleteAccountDialogProps) => {
   const [open, setOpen] = useState(false);
-  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const deleteAccountMutation = useMutation({
     mutationFn: async () => {
-      const result = await authClient.deleteUser({
-        password,
-      });
+      const result = await authClient.deleteUser();
       if (result.error) {
         throw new Error(result.error.message);
       }
@@ -48,25 +43,12 @@ export const DeleteAccountDialog = ({ trigger }: DeleteAccountDialogProps) => {
   });
 
   const handleDelete = () => {
-    if (!password.trim()) {
-      toast.error("Password is required");
-      return;
-    }
     deleteAccountMutation.mutate();
-  };
-
-  const handleClose = () => {
-    if (!deleteAccountMutation.isPending) {
-      setPassword("");
-      setOpen(false);
-    }
   };
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        {trigger}
-      </AlertDialogTrigger>
+      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
       <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2">
@@ -75,8 +57,8 @@ export const DeleteAccountDialog = ({ trigger }: DeleteAccountDialogProps) => {
           </AlertDialogTitle>
           <AlertDialogDescription className="space-y-2">
             <p>
-              This action cannot be undone. This will permanently delete your account
-              and all associated data including:
+              This action cannot be undone. This will permanently delete your
+              account and all associated data including:
             </p>
             <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground ml-2">
               <li>All your saved links</li>
@@ -89,30 +71,16 @@ export const DeleteAccountDialog = ({ trigger }: DeleteAccountDialogProps) => {
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="space-y-2 py-4">
-          <Label htmlFor="password">Confirm with password</Label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={deleteAccountMutation.isPending}
-          />
-        </div>
-
         <AlertDialogFooter>
           <AlertDialogCancel disabled={deleteAccountMutation.isPending}>
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
-            disabled={deleteAccountMutation.isPending || !password.trim()}
+            disabled={deleteAccountMutation.isPending}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            {deleteAccountMutation.isPending && (
-              <Spinner className="mr-2" />
-            )}
+            {deleteAccountMutation.isPending && <Spinner className="mr-2" />}
             Delete Account
           </AlertDialogAction>
         </AlertDialogFooter>
