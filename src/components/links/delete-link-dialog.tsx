@@ -63,7 +63,7 @@ export const DeleteLinkDialog = ({
             onClick={handleDelete}
             disabled={deleteMutation.isPending}
           >
-            {deleteMutation.isPending && <Spinner className="mr-2" />}
+            {deleteMutation.isPending && <Spinner />}
             Delete
           </Button>
         </AlertDialogFooter>
