@@ -7,7 +7,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { useRouteContext } from "@tanstack/react-router";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -16,7 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "./ui/button";
+import { Button } from "@/components/ui/button";
 
 interface ExportDataDialogProps {
   trigger: React.ReactNode;
@@ -112,15 +111,13 @@ export const ExportDataDialog = ({ trigger }: ExportDataDialogProps) => {
           <AlertDialogCancel disabled={exportDataMutation.isPending}>
             Cancel
           </AlertDialogCancel>
-          <AlertDialogAction asChild>
-            <Button
-              onClick={handleExport}
-              disabled={exportDataMutation.isPending}
-            >
-              {exportDataMutation.isPending ? <Spinner /> : <Download />}
-              Export Data
-            </Button>
-          </AlertDialogAction>
+          <Button
+            onClick={handleExport}
+            disabled={exportDataMutation.isPending}
+          >
+            {exportDataMutation.isPending ? <Spinner /> : <Download />}
+            Export Data
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

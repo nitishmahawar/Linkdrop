@@ -4,7 +4,6 @@ import { authClient } from "@/lib/auth-client";
 import { useNavigate } from "@tanstack/react-router";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -13,6 +12,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { AlertTriangle } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
@@ -75,14 +75,14 @@ export const DeleteAccountDialog = ({ trigger }: DeleteAccountDialogProps) => {
           <AlertDialogCancel disabled={deleteAccountMutation.isPending}>
             Cancel
           </AlertDialogCancel>
-          <AlertDialogAction
+          <Button
+            variant="destructive"
             onClick={handleDelete}
             disabled={deleteAccountMutation.isPending}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
             {deleteAccountMutation.isPending && <Spinner className="mr-2" />}
             Delete Account
-          </AlertDialogAction>
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

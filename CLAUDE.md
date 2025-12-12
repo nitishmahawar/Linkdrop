@@ -15,9 +15,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This is a **linkdrop application** built with modern web technologies for saving and organizing links with automatic metadata fetching, categories, and tags.
 
 ### Tech Stack
+
 - **Framework**: TanStack Router with file-based routing and React Start
 - **Styling**: Tailwind CSS v4 with Shadcn UI components
-- **Database**: PostgreSQL with Prisma ORM
+- **Database**: PostgreSQL with Drizzle ORM (@neondatabase/serverless)
 - **Authentication**: Better Auth with session-based auth
 - **API**: ORPC for type-safe RPC calls
 - **State Management**: TanStack Query
@@ -26,12 +27,14 @@ This is a **linkdrop application** built with modern web technologies for saving
 ### Directory Structure
 
 **Core App Structure**:
+
 - `src/routes/` - File-based routing with TanStack Router
 - `src/components/` - React components organized by feature
 - `src/orpc/` - RPC API routes and procedures
 - `src/lib/` - Utility functions and configurations
 
 **Key Directories**:
+
 - `src/components/ui/` - Shadcn UI components
 - `src/components/links/` - Link-related components (cards, dialogs, lists)
 - `src/orpc/router/` - API routers organized by domain (links, categories, tags, metadata)
@@ -41,6 +44,7 @@ This is a **linkdrop application** built with modern web technologies for saving
 The application uses a user-scoped multi-tenant architecture:
 
 **Core Models**:
+
 - `User` - User accounts with authentication
 - `Link` - Saved URLs with metadata (title, description, favicon, preview image)
 - `Category` - User-defined categories for organizing links
@@ -59,12 +63,14 @@ All user content is scoped by `userId` for proper data isolation.
 ### API Architecture
 
 **ORPC Setup**:
+
 - Base procedure for public endpoints
 - Protected procedure with session validation for user-specific operations
 - Modular routers: `links`, `categories`, `tags`, `metadata`
 - Type-safe client with TanStack Query integration
 
 **Key Procedures**:
+
 - Links CRUD operations with user filtering
 - Category and tag management
 - Metadata fetching for automatic link information extraction
@@ -72,12 +78,14 @@ All user content is scoped by `userId` for proper data isolation.
 ### Frontend Patterns
 
 **Component Organization**:
+
 - Feature-based component structure
 - Reusable UI components from Shadcn
 - Custom hooks for data fetching with TanStack Query
 - Form handling with React Hook Form and Zod validation
 
 **Routing**:
+
 - File-based routing in `src/routes/`
 - Root layout with authentication checks in `__root.tsx`
 - Lazy loading and data fetching support
@@ -87,5 +95,5 @@ All user content is scoped by `userId` for proper data isolation.
 - Use arrow functions (per user preferences)
 - Prefer interfaces over types (per user preferences)
 - Environment variables managed in `src/env.ts`
-- Prisma client generated to `src/generated/prisma/`
+- Drizzle schema files in `src/db/schema/` (one file per table)
 - Tailwind CSS v4 with Vite integration

@@ -1,6 +1,7 @@
 import { protectedProcedure } from "@/orpc";
-import { prisma } from "@/lib/prisma";
+import { db, categories } from "@/db";
 import { InferRouterOutputs, ORPCError } from "@orpc/server";
+import { eq, and, ilike, desc } from "drizzle-orm";
 import {
   createCategorySchema,
   updateCategorySchema,
@@ -17,21 +18,27 @@ export const categoriesRouter = {
     .handler(async ({ input, context }) => {
       const userId = context.session.user.id;
 
-      const category = await prisma.category.create({
-        data: {
+      const [category] = await db
+        .insert(categories)
+        .values({
           ...input,
           userId,
-        },
-        include: {
+        })
+        .returning();
+
+      // Fetch with relations
+      const result = await db.query.categories.findFirst({
+        where: eq(categories.id, category.id),
+        with: {
           linkCategories: {
-            include: {
+            with: {
               link: true,
             },
           },
         },
       });
 
-      return category;
+      return result!;
     }),
 
   // Get all categories
@@ -41,20 +48,18 @@ export const categoriesRouter = {
       const userId = context.session.user.id;
       const { search } = input;
 
-      const categories = await prisma.category.findMany({
-        where: {
-          userId,
-          ...(search && {
-            name: { contains: search, mode: "insensitive" },
-          }),
-        },
+      const conditions = [eq(categories.userId, userId)];
 
-        orderBy: {
-          createdAt: "desc",
-        },
+      if (search) {
+        conditions.push(ilike(categories.name, `%${search}%`));
+      }
+
+      const result = await db.query.categories.findMany({
+        where: and(...conditions),
+        orderBy: desc(categories.createdAt),
       });
 
-      return categories;
+      return result;
     }),
 
   // Get category by ID
@@ -63,14 +68,11 @@ export const categoriesRouter = {
     .handler(async ({ input, context }) => {
       const userId = context.session.user.id;
 
-      const category = await prisma.category.findFirst({
-        where: {
-          id: input.id,
-          userId,
-        },
-        include: {
+      const category = await db.query.categories.findFirst({
+        where: and(eq(categories.id, input.id), eq(categories.userId, userId)),
+        with: {
           linkCategories: {
-            include: {
+            with: {
               link: true,
             },
           },
@@ -92,30 +94,28 @@ export const categoriesRouter = {
       const { id, ...updateData } = input;
 
       // Check if category exists and belongs to user
-      const existingCategory = await prisma.category.findFirst({
-        where: {
-          id,
-          userId,
-        },
+      const existingCategory = await db.query.categories.findFirst({
+        where: and(eq(categories.id, id), eq(categories.userId, userId)),
       });
 
       if (!existingCategory) {
         throw new ORPCError("NOT_FOUND", { message: "Category not found" });
       }
 
-      const category = await prisma.category.update({
-        where: { id },
-        data: updateData,
-        include: {
+      await db.update(categories).set(updateData).where(eq(categories.id, id));
+
+      const category = await db.query.categories.findFirst({
+        where: eq(categories.id, id),
+        with: {
           linkCategories: {
-            include: {
+            with: {
               link: true,
             },
           },
         },
       });
 
-      return category;
+      return category!;
     }),
 
   // Delete category
@@ -125,20 +125,15 @@ export const categoriesRouter = {
       const userId = context.session.user.id;
 
       // Check if category exists and belongs to user
-      const existingCategory = await prisma.category.findFirst({
-        where: {
-          id: input.id,
-          userId,
-        },
+      const existingCategory = await db.query.categories.findFirst({
+        where: and(eq(categories.id, input.id), eq(categories.userId, userId)),
       });
 
       if (!existingCategory) {
         throw new ORPCError("NOT_FOUND", { message: "Category not found" });
       }
 
-      await prisma.category.delete({
-        where: { id: input.id },
-      });
+      await db.delete(categories).where(eq(categories.id, input.id));
 
       return { success: true, id: input.id };
     }),

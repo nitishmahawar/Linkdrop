@@ -1,6 +1,7 @@
 import { protectedProcedure } from "@/orpc";
-import { prisma } from "@/lib/prisma";
+import { db, tags } from "@/db";
 import { InferRouterOutputs, ORPCError } from "@orpc/server";
+import { eq, and, ilike, desc } from "drizzle-orm";
 import {
   createTagSchema,
   updateTagSchema,
@@ -17,21 +18,27 @@ export const tagsRouter = {
     .handler(async ({ input, context }) => {
       const userId = context.session.user.id;
 
-      const tag = await prisma.tag.create({
-        data: {
+      const [tag] = await db
+        .insert(tags)
+        .values({
           ...input,
           userId,
-        },
-        include: {
+        })
+        .returning();
+
+      // Fetch with relations
+      const result = await db.query.tags.findFirst({
+        where: eq(tags.id, tag.id),
+        with: {
           linkTags: {
-            include: {
+            with: {
               link: true,
             },
           },
         },
       });
 
-      return tag;
+      return result!;
     }),
 
   // Get all tags
@@ -41,19 +48,18 @@ export const tagsRouter = {
       const userId = context.session.user.id;
       const { search } = input;
 
-      const tags = await prisma.tag.findMany({
-        where: {
-          userId,
-          ...(search && {
-            name: { contains: search, mode: "insensitive" },
-          }),
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
+      const conditions = [eq(tags.userId, userId)];
+
+      if (search) {
+        conditions.push(ilike(tags.name, `%${search}%`));
+      }
+
+      const result = await db.query.tags.findMany({
+        where: and(...conditions),
+        orderBy: desc(tags.createdAt),
       });
 
-      return tags;
+      return result;
     }),
 
   // Get tag by ID
@@ -62,14 +68,11 @@ export const tagsRouter = {
     .handler(async ({ input, context }) => {
       const userId = context.session.user.id;
 
-      const tag = await prisma.tag.findFirst({
-        where: {
-          id: input.id,
-          userId,
-        },
-        include: {
+      const tag = await db.query.tags.findFirst({
+        where: and(eq(tags.id, input.id), eq(tags.userId, userId)),
+        with: {
           linkTags: {
-            include: {
+            with: {
               link: true,
             },
           },
@@ -91,30 +94,28 @@ export const tagsRouter = {
       const { id, ...updateData } = input;
 
       // Check if tag exists and belongs to user
-      const existingTag = await prisma.tag.findFirst({
-        where: {
-          id,
-          userId,
-        },
+      const existingTag = await db.query.tags.findFirst({
+        where: and(eq(tags.id, id), eq(tags.userId, userId)),
       });
 
       if (!existingTag) {
         throw new ORPCError("NOT_FOUND", { message: "Tag not found" });
       }
 
-      const tag = await prisma.tag.update({
-        where: { id },
-        data: updateData,
-        include: {
+      await db.update(tags).set(updateData).where(eq(tags.id, id));
+
+      const tag = await db.query.tags.findFirst({
+        where: eq(tags.id, id),
+        with: {
           linkTags: {
-            include: {
+            with: {
               link: true,
             },
           },
         },
       });
 
-      return tag;
+      return tag!;
     }),
 
   // Delete tag
@@ -124,20 +125,15 @@ export const tagsRouter = {
       const userId = context.session.user.id;
 
       // Check if tag exists and belongs to user
-      const existingTag = await prisma.tag.findFirst({
-        where: {
-          id: input.id,
-          userId,
-        },
+      const existingTag = await db.query.tags.findFirst({
+        where: and(eq(tags.id, input.id), eq(tags.userId, userId)),
       });
 
       if (!existingTag) {
         throw new ORPCError("NOT_FOUND", { message: "Tag not found" });
       }
 
-      await prisma.tag.delete({
-        where: { id: input.id },
-      });
+      await db.delete(tags).where(eq(tags.id, input.id));
 
       return { success: true, id: input.id };
     }),

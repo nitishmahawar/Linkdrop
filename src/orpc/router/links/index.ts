@@ -1,6 +1,7 @@
 import { protectedProcedure } from "@/orpc";
-import { prisma } from "@/lib/prisma";
+import { db, links, linkCategories, linkTags } from "@/db";
 import { InferRouterOutputs, ORPCError } from "@orpc/server";
+import { eq, and, ilike, or, inArray, count, desc, asc } from "drizzle-orm";
 import {
   createLinkSchema,
   updateLinkSchema,
@@ -20,41 +21,53 @@ export const linksRouter = {
       const { categoryIds, tagIds, ...linkData } = input;
       const userId = context.session.user.id;
 
-      // Create link with relations
-      const link = await prisma.link.create({
-        data: {
+      // Create link
+      const [link] = await db
+        .insert(links)
+        .values({
           ...linkData,
           userId,
-          linkCategories: categoryIds
-            ? {
-                create: categoryIds.map((categoryId: string) => ({
-                  categoryId,
-                })),
-              }
-            : undefined,
-          linkTags: tagIds
-            ? {
-                create: tagIds.map((tagId: string) => ({
-                  tagId,
-                })),
-              }
-            : undefined,
-        },
-        include: {
+        })
+        .returning();
+
+      // Create category relations
+      if (categoryIds && categoryIds.length > 0) {
+        await db.insert(linkCategories).values(
+          categoryIds.map((categoryId) => ({
+            linkId: link.id,
+            categoryId,
+          }))
+        );
+      }
+
+      // Create tag relations
+      if (tagIds && tagIds.length > 0) {
+        await db.insert(linkTags).values(
+          tagIds.map((tagId) => ({
+            linkId: link.id,
+            tagId,
+          }))
+        );
+      }
+
+      // Fetch the complete link with relations
+      const result = await db.query.links.findFirst({
+        where: eq(links.id, link.id),
+        with: {
           linkCategories: {
-            include: {
+            with: {
               category: true,
             },
           },
           linkTags: {
-            include: {
+            with: {
               tag: true,
             },
           },
         },
       });
 
-      return link;
+      return result!;
     }),
 
   // Get all links with filters
@@ -73,89 +86,70 @@ export const linksRouter = {
         sortOrder,
       } = input;
 
-      // Get total count
-      const total = await prisma.link.count({
-        where: {
-          userId,
-          ...(search && {
-            OR: [
-              { title: { contains: search, mode: "insensitive" } },
-              { description: { contains: search, mode: "insensitive" } },
-              { notes: { contains: search, mode: "insensitive" } },
-              { url: { contains: search, mode: "insensitive" } },
-            ],
-          }),
-          ...(categoryIds &&
-            categoryIds.length > 0 && {
-              linkCategories: {
-                some: {
-                  categoryId: { in: categoryIds },
-                },
-              },
-            }),
-          ...(tagIds &&
-            tagIds.length > 0 && {
-              linkTags: {
-                some: {
-                  tagId: { in: tagIds },
-                },
-              },
-            }),
-          ...(isFavorite !== undefined && { isFavorite }),
-        },
-      });
+      // Build where conditions
+      const conditions = [eq(links.userId, userId)];
 
-      // Get links
-      const links = await prisma.link.findMany({
-        where: {
-          userId,
-          ...(search && {
-            OR: [
-              { title: { contains: search, mode: "insensitive" } },
-              { description: { contains: search, mode: "insensitive" } },
-              { notes: { contains: search, mode: "insensitive" } },
-              { url: { contains: search, mode: "insensitive" } },
-            ],
-          }),
-          ...(categoryIds &&
-            categoryIds.length > 0 && {
-              linkCategories: {
-                some: {
-                  categoryId: { in: categoryIds },
-                },
-              },
-            }),
-          ...(tagIds &&
-            tagIds.length > 0 && {
-              linkTags: {
-                some: {
-                  tagId: { in: tagIds },
-                },
-              },
-            }),
-          ...(isFavorite !== undefined && { isFavorite }),
-        },
-        include: {
+      if (search) {
+        conditions.push(
+          or(
+            ilike(links.title, `%${search}%`),
+            ilike(links.description, `%${search}%`),
+            ilike(links.notes, `%${search}%`),
+            ilike(links.url, `%${search}%`)
+          )!
+        );
+      }
+
+      if (isFavorite !== undefined) {
+        conditions.push(eq(links.isFavorite, isFavorite));
+      }
+
+      // Get total count
+      const [{ count: total }] = await db
+        .select({ count: count() })
+        .from(links)
+        .where(and(...conditions));
+
+      // Build order by
+      const orderByColumn = links[sortBy as keyof typeof links.$inferSelect];
+      const orderBy =
+        sortOrder === "desc" ? desc(orderByColumn) : asc(orderByColumn);
+
+      // Get links with relations
+      let linkResults = await db.query.links.findMany({
+        where: and(...conditions),
+        with: {
           linkCategories: {
-            include: {
+            with: {
               category: true,
             },
           },
           linkTags: {
-            include: {
+            with: {
               tag: true,
             },
           },
         },
-        orderBy: {
-          [sortBy]: sortOrder,
-        },
-        take: limit,
-        skip: offset,
+        orderBy,
+        limit,
+        offset,
       });
 
+      // Filter by category and tag IDs if provided
+      if (categoryIds && categoryIds.length > 0) {
+        linkResults = linkResults.filter((link) =>
+          link.linkCategories.some((lc) => categoryIds.includes(lc.categoryId))
+        );
+      }
+
+      if (tagIds && tagIds.length > 0) {
+        linkResults = linkResults.filter((link) =>
+          link.linkTags.some((lt) => tagIds.includes(lt.tagId))
+        );
+      }
+
       return {
-        links,
+        links: linkResults,
         total,
         limit,
         offset,
@@ -169,19 +163,16 @@ export const linksRouter = {
     .handler(async ({ input, context }) => {
       const userId = context.session.user.id;
 
-      const link = await prisma.link.findFirst({
-        where: {
-          id: input.id,
-          userId,
-        },
-        include: {
+      const link = await db.query.links.findFirst({
+        where: and(eq(links.id, input.id), eq(links.userId, userId)),
+        with: {
           linkCategories: {
-            include: {
+            with: {
               category: true,
             },
           },
           linkTags: {
-            include: {
+            with: {
               tag: true,
             },
           },
@@ -203,11 +194,8 @@ export const linksRouter = {
       const { id, categoryIds, tagIds, ...updateData } = input;
 
       // Check if link exists and belongs to user
-      const existingLink = await prisma.link.findFirst({
-        where: {
-          id,
-          userId,
-        },
+      const existingLink = await db.query.links.findFirst({
+        where: and(eq(links.id, id), eq(links.userId, userId)),
       });
 
       if (!existingLink) {
@@ -215,42 +203,52 @@ export const linksRouter = {
       }
 
       // Update link
-      const link = await prisma.link.update({
-        where: { id },
-        data: {
-          ...updateData,
-          ...(categoryIds !== undefined && {
-            linkCategories: {
-              deleteMany: {},
-              create: categoryIds.map((categoryId: string) => ({
-                categoryId,
-              })),
-            },
-          }),
-          ...(tagIds !== undefined && {
-            linkTags: {
-              deleteMany: {},
-              create: tagIds.map((tagId: string) => ({
-                tagId,
-              })),
-            },
-          }),
-        },
-        include: {
+      await db.update(links).set(updateData).where(eq(links.id, id));
+
+      // Update category relations if provided
+      if (categoryIds !== undefined) {
+        await db.delete(linkCategories).where(eq(linkCategories.linkId, id));
+        if (categoryIds.length > 0) {
+          await db.insert(linkCategories).values(
+            categoryIds.map((categoryId) => ({
+              linkId: id,
+              categoryId,
+            }))
+          );
+        }
+      }
+
+      // Update tag relations if provided
+      if (tagIds !== undefined) {
+        await db.delete(linkTags).where(eq(linkTags.linkId, id));
+        if (tagIds.length > 0) {
+          await db.insert(linkTags).values(
+            tagIds.map((tagId) => ({
+              linkId: id,
+              tagId,
+            }))
+          );
+        }
+      }
+
+      // Fetch updated link with relations
+      const link = await db.query.links.findFirst({
+        where: eq(links.id, id),
+        with: {
           linkCategories: {
-            include: {
+            with: {
               category: true,
             },
           },
           linkTags: {
-            include: {
+            with: {
               tag: true,
             },
           },
         },
       });
 
-      return link;
+      return link!;
     }),
 
   // Toggle favorite
@@ -260,35 +258,36 @@ export const linksRouter = {
       const userId = context.session.user.id;
 
       // Check if link exists and belongs to user
-      const existingLink = await prisma.link.findFirst({
-        where: {
-          id: input.id,
-          userId,
-        },
+      const existingLink = await db.query.links.findFirst({
+        where: and(eq(links.id, input.id), eq(links.userId, userId)),
       });
 
       if (!existingLink) {
         throw new ORPCError("NOT_FOUND", { message: "Link not found" });
       }
 
-      const link = await prisma.link.update({
-        where: { id: input.id },
-        data: { isFavorite: input.isFavorite },
-        include: {
+      await db
+        .update(links)
+        .set({ isFavorite: input.isFavorite })
+        .where(eq(links.id, input.id));
+
+      const link = await db.query.links.findFirst({
+        where: eq(links.id, input.id),
+        with: {
           linkCategories: {
-            include: {
+            with: {
               category: true,
             },
           },
           linkTags: {
-            include: {
+            with: {
               tag: true,
             },
           },
         },
       });
 
-      return link;
+      return link!;
     }),
 
   // Delete link
@@ -298,20 +297,15 @@ export const linksRouter = {
       const userId = context.session.user.id;
 
       // Check if link exists and belongs to user
-      const existingLink = await prisma.link.findFirst({
-        where: {
-          id: input.id,
-          userId,
-        },
+      const existingLink = await db.query.links.findFirst({
+        where: and(eq(links.id, input.id), eq(links.userId, userId)),
       });
 
       if (!existingLink) {
         throw new ORPCError("NOT_FOUND", { message: "Link not found" });
       }
 
-      await prisma.link.delete({
-        where: { id: input.id },
-      });
+      await db.delete(links).where(eq(links.id, input.id));
 
       return { success: true, id: input.id };
     }),
@@ -323,14 +317,11 @@ export const linksRouter = {
       const userId = context.session.user.id;
 
       // Delete only links that belong to the user
-      const result = await prisma.link.deleteMany({
-        where: {
-          id: { in: input.ids },
-          userId,
-        },
-      });
+      const result = await db
+        .delete(links)
+        .where(and(inArray(links.id, input.ids), eq(links.userId, userId)));
 
-      return { success: true, deletedCount: result.count };
+      return { success: true, deletedCount: result.rowCount ?? 0 };
     }),
 };
 

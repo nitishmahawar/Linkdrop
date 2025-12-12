@@ -1,5 +1,6 @@
 import { protectedProcedure } from "@/orpc";
-import { prisma } from "@/lib/prisma";
+import { db, links, categories, tags } from "@/db";
+import { eq, count, and, desc, asc } from "drizzle-orm";
 import { exportDataSchema, getAccountStatsSchema } from "./schema";
 
 // Export the user router
@@ -11,43 +12,37 @@ export const userRouter = {
       const userId = context.session.user.id;
 
       // Fetch all user data in parallel
-      const [links, categories, tags] = await Promise.all([
-        prisma.link.findMany({
-          where: { userId },
-          include: {
+      const [userLinks, userCategories, userTags] = await Promise.all([
+        db.query.links.findMany({
+          where: eq(links.userId, userId),
+          with: {
             linkCategories: {
-              include: {
+              with: {
                 category: true,
               },
             },
             linkTags: {
-              include: {
+              with: {
                 tag: true,
               },
             },
           },
-          orderBy: {
-            createdAt: "desc",
-          },
+          orderBy: desc(links.createdAt),
         }),
-        prisma.category.findMany({
-          where: { userId },
-          orderBy: {
-            name: "asc",
-          },
+        db.query.categories.findMany({
+          where: eq(categories.userId, userId),
+          orderBy: asc(categories.name),
         }),
-        prisma.tag.findMany({
-          where: { userId },
-          orderBy: {
-            name: "asc",
-          },
+        db.query.tags.findMany({
+          where: eq(tags.userId, userId),
+          orderBy: asc(tags.name),
         }),
       ]);
 
       return {
-        links,
-        categories,
-        tags,
+        links: userLinks,
+        categories: userCategories,
+        tags: userTags,
         exportedAt: new Date().toISOString(),
       };
     }),
@@ -59,24 +54,26 @@ export const userRouter = {
       const userId = context.session.user.id;
 
       // Get counts in parallel
-      const [totalLinks, totalCategories, totalTags, favoriteLinks] =
-        await Promise.all([
-          prisma.link.count({
-            where: { userId },
-          }),
-          prisma.category.count({
-            where: { userId },
-          }),
-          prisma.tag.count({
-            where: { userId },
-          }),
-          prisma.link.count({
-            where: {
-              userId,
-              isFavorite: true,
-            },
-          }),
-        ]);
+      const [
+        [{ count: totalLinks }],
+        [{ count: totalCategories }],
+        [{ count: totalTags }],
+        [{ count: favoriteLinks }],
+      ] = await Promise.all([
+        db
+          .select({ count: count() })
+          .from(links)
+          .where(eq(links.userId, userId)),
+        db
+          .select({ count: count() })
+          .from(categories)
+          .where(eq(categories.userId, userId)),
+        db.select({ count: count() }).from(tags).where(eq(tags.userId, userId)),
+        db
+          .select({ count: count() })
+          .from(links)
+          .where(and(eq(links.userId, userId), eq(links.isFavorite, true))),
+      ]);
 
       return {
         totalLinks,

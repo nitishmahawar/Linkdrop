@@ -3,7 +3,6 @@ import { orpc } from "@/orpc/client";
 import { toast } from "sonner";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -11,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 
 interface DeleteTagDialogProps {
@@ -63,14 +63,14 @@ export const DeleteTagDialog = ({
           <AlertDialogCancel disabled={deleteMutation.isPending}>
             Cancel
           </AlertDialogCancel>
-          <AlertDialogAction
+          <Button
+            variant="destructive"
             onClick={handleDelete}
             disabled={deleteMutation.isPending}
-            className="bg-destructive hover:bg-destructive/90"
           >
             {deleteMutation.isPending && <Spinner />}
             Delete Tag
-          </AlertDialogAction>
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
