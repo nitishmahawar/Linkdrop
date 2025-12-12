@@ -11,11 +11,12 @@ export const sessions = pgTable(
       .$defaultFn(() => createId()),
     expiresAt: timestamp("expiresAt").notNull(),
     token: text("token").notNull().unique(),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt")
-      .defaultNow()
+    createdAt: timestamp("createdAt")
       .notNull()
-      .$onUpdate(() => new Date()),
+      .$defaultFn(() => new Date()),
+    updatedAt: timestamp("updatedAt")
+      .notNull()
+      .$defaultFn(() => new Date()),
     ipAddress: text("ipAddress"),
     userAgent: text("userAgent"),
     userId: text("userId")

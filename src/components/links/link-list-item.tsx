@@ -9,6 +9,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { LinkActionsMenu } from "./link-actions-menu";
 import { ExternalLink, Globe } from "lucide-react";
+import { Image } from "@unpic/react";
 import type { Link } from "@/orpc/router/links";
 
 interface LinkListItemProps {
@@ -36,19 +37,12 @@ export const LinkListItem = ({ link }: LinkListItemProps) => {
       {/* Favicon with fallback */}
       <ItemMedia variant="image">
         {link.faviconUrl ? (
-          <img
+          <Image
             src={link.faviconUrl}
             alt=""
+            width={24}
+            height={24}
             className="w-6 h-6"
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-              const parent = e.currentTarget.parentElement;
-              if (parent) {
-                const icon = document.createElement("div");
-                icon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>`;
-                parent.appendChild(icon.firstChild!);
-              }
-            }}
           />
         ) : (
           <Globe className="w-5 h-5 text-muted-foreground" />

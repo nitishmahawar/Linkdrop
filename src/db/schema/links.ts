@@ -21,11 +21,12 @@ export const links = pgTable(
     faviconUrl: text("faviconUrl"),
     previewImageUrl: text("previewImageUrl"),
     isFavorite: boolean("isFavorite").default(false).notNull(),
-    createdAt: timestamp("createdAt").defaultNow().notNull(),
-    updatedAt: timestamp("updatedAt")
-      .defaultNow()
+    createdAt: timestamp("createdAt")
       .notNull()
-      .$onUpdate(() => new Date()),
+      .$defaultFn(() => new Date()),
+    updatedAt: timestamp("updatedAt")
+      .notNull()
+      .$defaultFn(() => new Date()),
   },
   (table) => [
     index("links_userId_idx").on(table.userId),

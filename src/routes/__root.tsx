@@ -14,20 +14,20 @@ import appCss from "../styles.css?url";
 import type { QueryClient } from "@tanstack/react-query";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
-import { authClient } from "@/lib/auth-client";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 import { NotFound } from "@/components/not-found";
+import { auth } from "@/lib/auth";
 
 interface MyRouterContext {
   queryClient: QueryClient;
 }
 
 const getSession = createServerFn({ method: "GET" }).handler(async () => {
-  const { data } = await authClient.getSession({
-    fetchOptions: { headers: getRequestHeaders() },
+  const session = await auth.api.getSession({
+    headers: getRequestHeaders(),
   });
-  return data;
+  return session;
 });
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({

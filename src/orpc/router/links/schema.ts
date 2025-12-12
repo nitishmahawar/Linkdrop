@@ -6,8 +6,14 @@ export const createLinkSchema = z.object({
   title: z.string().min(1, { error: "Title is required" }),
   description: z.string().optional(),
   notes: z.string().optional(),
-  faviconUrl: z.url().optional(),
-  previewImageUrl: z.url().optional(),
+  faviconUrl: z
+    .string()
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : undefined)),
+  previewImageUrl: z
+    .string()
+    .optional()
+    .transform((v) => (v && v.length > 0 ? v : undefined)),
   isFavorite: z.boolean().default(false),
   categoryIds: z.array(z.string()).optional(),
   tagIds: z.array(z.string()).optional(),

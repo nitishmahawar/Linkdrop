@@ -15,11 +15,12 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("emailVerified").default(false).notNull(),
   image: text("image"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt")
-    .defaultNow()
+  createdAt: timestamp("createdAt")
     .notNull()
-    .$onUpdate(() => new Date()),
+    .$defaultFn(() => new Date()),
+  updatedAt: timestamp("updatedAt")
+    .notNull()
+    .$defaultFn(() => new Date()),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
